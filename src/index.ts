@@ -22,6 +22,17 @@ export {
   animate,
   animateTransform,
   animationSet,
+  regularPolygon,
+  star,
+  arrow,
+  chevron,
+  cross,
+  plus,
+  diamond,
+  heart,
+  donut,
+  gear,
+  spiral,
   withStroke,
   withClass,
   withStyle,
@@ -60,4 +71,4 @@ export {
 export { render } from './renderer';
 export type { RenderOptions } from './renderer';
 export type { SvgDef, EventHandler, GradientStop } from './types';
-export type { TransformStep } from './elements';
+export type { TransformStep, ChevronDir } from './elements';

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AbscomSVG — Built-in Shapes</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 900px;
+      margin: 2rem auto;
+      background: #f8f9fa;
+      padding: 0 1rem;
+      color: #333;
+    }
+    .demo {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .demo h2 {
+      margin-top: 0;
+      font-size: 1.1rem;
+      color: #444;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 0.5rem;
+    }
+    .demo-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+    }
+    .demo-item {
+      text-align: center;
+    }
+    .demo-item svg {
+      display: block;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    .demo-item label {
+      display: block;
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 0.3rem;
+    }
+    code {
+      background: #eef;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="demo">
+  <h2>regularPolygon</h2>
+  <p>Create triangles, hexagons, octagons, and more.</p>
+  <div class="demo-row">
+    <div class="demo-item">
+      <svg id="demo-triangle" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Triangle (3 sides)</label>
+    </div>
+    <div class="demo-item">
+      <svg id="demo-hexagon" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Hexagon (6 sides)</label>
+    </div>
+    <div class="demo-item">
+      <svg id="demo-octagon" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Octagon (8 sides)</label>
+    </div>
+  </div>
+</div>
+
+<div class="demo">
+  <h2>star</h2>
+  <p>Stars with any number of points.</p>
+  <div class="demo-row">
+    <div class="demo-item">
+      <svg id="demo-star5" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>5-point star</label>
+    </div>
+    <div class="demo-item">
+      <svg id="demo-star4" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>4-point sparkle</label>
+    </div>
+    <div class="demo-item">
+      <svg id="demo-star6" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>6-point star</label>
+    </div>
+  </div>
+</div>
+
+<div class="demo">
+  <h2>arrow &amp; chevron</h2>
+  <p>Directional indicators.</p>
+  <div class="demo-row">
+    <div class="demo-item">
+      <svg id="demo-arrow" width="120" height="60" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Arrow</label>
+    </div>
+    <div class="demo-item">
+      <svg id="demo-chevron-right" width="80" height="60" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Chevron right</label>
+    </div>
+    <div class="demo-item">
+      <svg id="demo-chevron-up" width="60" height="60" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Chevron up</label>
+    </div>
+  </div>
+</div>
+
+<div class="demo">
+  <h2>cross, plus &amp; diamond</h2>
+  <p>Common UI symbols.</p>
+  <div class="demo-row">
+    <div class="demo-item">
+      <svg id="demo-cross" width="80" height="80" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Cross (X)</label>
+    </div>
+    <div class="demo-item">
+      <svg id="demo-plus" width="80" height="80" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Plus (+)</label>
+    </div>
+    <div class="demo-item">
+      <svg id="demo-diamond" width="80" height="80" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Diamond</label>
+    </div>
+  </div>
+</div>
+
+<div class="demo">
+  <h2>heart &amp; donut</h2>
+  <p>Filled shapes with curves and holes.</p>
+  <div class="demo-row">
+    <div class="demo-item">
+      <svg id="demo-heart" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Heart</label>
+    </div>
+    <div class="demo-item">
+      <svg id="demo-donut" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Donut</label>
+    </div>
+  </div>
+</div>
+
+<div class="demo">
+  <h2>gear &amp; spiral</h2>
+  <p>Mechanical and decorative shapes.</p>
+  <div class="demo-row">
+    <div class="demo-item">
+      <svg id="demo-gear" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>8-tooth gear</label>
+    </div>
+    <div class="demo-item">
+      <svg id="demo-spiral" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>4-turn spiral</label>
+    </div>
+  </div>
+</div>
+
+<script src="/dist/abscomsvg.iife.js"></script>
+<script>
+  const { render, regularPolygon, star, arrow, chevron, cross, plus, diamond, heart, donut, gear, spiral } = AbscomSVG;
+
+  // ---- regularPolygon ----
+  render('#demo-triangle', regularPolygon(50, 50, 3, 35, 'tomato'));
+  render('#demo-hexagon', regularPolygon(50, 50, 6, 35, 'dodgerblue'));
+  render('#demo-octagon', regularPolygon(50, 50, 8, 35, 'seagreen'));
+
+  // ---- star ----
+  render('#demo-star5', star(50, 50, 35, 14, 5, 'gold'));
+  render('#demo-star4', star(50, 50, 30, 10, 4, 'goldenrod'));
+  render('#demo-star6', star(50, 50, 35, 18, 6, 'orange'));
+
+  // ---- arrow ----
+  render('#demo-arrow', arrow(10, 30, 100, 30, 'crimson'));
+
+  // ---- chevron ----
+  render('#demo-chevron-right', chevron(10, 10, 40, 30, 'right', 'steelblue'));
+  render('#demo-chevron-up', chevron(10, 45, 40, 20, 'up', 'steelblue'));
+
+  // ---- cross ----
+  render('#demo-cross', cross(40, 40, 25, 8, 'red'));
+
+  // ---- plus ----
+  render('#demo-plus', plus(40, 40, 20, 8, 'green'));
+
+  // ---- diamond ----
+  render('#demo-diamond', diamond(40, 40, 25, 18, 'purple'));
+
+  // ---- heart ----
+  render('#demo-heart', heart(50, 50, 35, 'crimson'));
+
+  // ---- donut ----
+  render('#demo-donut', donut(50, 50, 35, 18, 'chocolate'));
+
+  // ---- gear ----
+  render('#demo-gear', gear(50, 50, 35, 25, 8, 'silver'));
+
+  // ---- spiral ----
+  render('#demo-spiral', spiral(50, 50, 4, 35, 'dodgerblue'));
+</script>
+</body>
+</html>

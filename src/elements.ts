@@ -201,6 +201,334 @@ export function image(href: string, x: number, y: number, width: number, height:
 }
 
 // ============================================================
+// Built-in Complex Shapes
+// ============================================================
+
+/**
+ * Create a regular polygon (e.g. triangle, hexagon, octagon).
+ *
+ * All vertices lie on a circle centered at (`cx`, `cy`).
+ * The first vertex points straight up (12 o'clock position).
+ *
+ * @param cx - Center x coordinate (required)
+ * @param cy - Center y coordinate (required)
+ * @param sides - Number of sides — e.g. `3` for triangle, `6` for hexagon, `8` for octagon. Must be ≥ 3.
+ * @param radius - Distance from center to each vertex (required)
+ * @param fill - Fill color (optional). Default: undefined (transparent).
+ * @returns A polygon SvgDef with computed `points`
+ *
+ * @example
+ * // Hexagon centered at (50,50) with radius 40
+ * regularPolygon(50, 50, 6, 40, 'dodgerblue')
+ *
+ * @example
+ * // Triangle pointing up
+ * regularPolygon(100, 100, 3, 50, 'gold')
+ */
+export function regularPolygon(cx: number, cy: number, sides: number, radius: number, fill?: string): SvgDef {
+  const points: string[] = [];
+  for (let i = 0; i < sides; i++) {
+    const angle = (2 * Math.PI * i) / sides - Math.PI / 2;
+    points.push(`${cx + radius * Math.cos(angle)},${cy + radius * Math.sin(angle)}`);
+  }
+  return { type: 'polygon', attrs: { points: points.join(' '), fill } };
+}
+
+/**
+ * Create a star shape.
+ *
+ * Alternates between outer and inner vertices to create star points.
+ * The first point points straight up (12 o'clock position).
+ *
+ * @param cx - Center x coordinate (required)
+ * @param cy - Center y coordinate (required)
+ * @param outerR - Radius of the outer (tip) vertices (required)
+ * @param innerR - Radius of the inner (valley) vertices (required)
+ * @param points - Number of star points — e.g. `5` for a classic star, `6` for Star of David (required)
+ * @param fill - Fill color (optional). Default: undefined (transparent).
+ * @returns A polygon SvgDef with computed `points`
+ *
+ * @example
+ * // Classic 5-point star
+ * star(50, 50, 40, 16, 5, 'gold')
+ *
+ * @example
+ * // 4-point star (like a sparkle)
+ * star(50, 50, 30, 10, 4, 'yellow')
+ */
+export function star(cx: number, cy: number, outerR: number, innerR: number, points: number, fill?: string): SvgDef {
+  const coords: string[] = [];
+  for (let i = 0; i < points * 2; i++) {
+    const angle = (Math.PI * i) / points - Math.PI / 2;
+    const r = i % 2 === 0 ? outerR : innerR;
+    coords.push(`${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`);
+  }
+  return { type: 'polygon', attrs: { points: coords.join(' '), fill } };
+}
+
+export type ChevronDir = 'right' | 'left' | 'up' | 'down';
+
+/**
+ * Create an arrow (line with a triangular arrowhead).
+ *
+ * The arrow is drawn as a filled path from (`x1`,`y1`) to (`x2`,`y2`).
+ * The arrowhead automatically rotates to match the line direction.
+ *
+ * @param x1 - Start x coordinate (required)
+ * @param y1 - Start y coordinate (required)
+ * @param x2 - End x coordinate (tip of arrow, required)
+ * @param y2 - End y coordinate (tip of arrow, required)
+ * @param fill - Fill color for the arrow body and head (optional). Default: `'black'`.
+ * @returns A path SvgDef with stroke-linecap="round"
+ *
+ * @example
+ * // Arrow from (10,50) to (200,50) pointing right
+ * arrow(10, 50, 200, 50, 'crimson')
+ *
+ * @example
+ * // Diagonal arrow
+ * arrow(20, 80, 180, 20, 'navy')
+ */
+export function arrow(x1: number, y1: number, x2: number, y2: number, fill?: string): SvgDef {
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+  const headLen = 12;
+  const headW = 6;
+  const ax = x2 - headLen * Math.cos(angle);
+  const ay = y2 - headLen * Math.sin(angle);
+  const bx = ax - headW * Math.sin(angle);
+  const by = ay + headW * Math.cos(angle);
+  const cx = ax + headW * Math.sin(angle);
+  const cy = ay - headW * Math.cos(angle);
+  const d = `M ${x1} ${y1} L ${x2} ${y2} M ${bx} ${by} L ${x2} ${y2} L ${cx} ${cy}`;
+  return {
+    type: 'path',
+    attrs: {
+      d,
+      fill: 'none',
+      stroke: fill || 'black',
+      'stroke-width': 2,
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+    },
+  };
+}
+
+/**
+ * Create a chevron shape (V-shaped bracket / angle).
+ *
+ * @param x - Top-left x of the chevron bounding box (required)
+ * @param y - Top-left y of the chevron bounding box (required)
+ * @param w - Width of the chevron bounding box (required)
+ * @param h - Height of the chevron bounding box (required)
+ * @param dir - Direction the chevron points: `'right'`, `'left'`, `'up'`, or `'down'` (default `'right'`)
+ * @param fill - Fill color for the chevron (optional). Default: `'black'`.
+ * @returns A path SvgDef with stroke-linecap="round"
+ *
+ * @example
+ * // Right-pointing chevron
+ * chevron(0, 0, 40, 30, 'right', 'steelblue')
+ *
+ * @example
+ * // Up-pointing chevron (like a caret)
+ * chevron(0, 30, 40, 20, 'up')
+ */
+export function chevron(x: number, y: number, w: number, h: number, dir: ChevronDir = 'right', fill?: string): SvgDef {
+  let d: string;
+  switch (dir) {
+    case 'left':
+      d = `M ${x + w} ${y} L ${x} ${y + h / 2} L ${x + w} ${y + h}`;
+      break;
+    case 'up':
+      d = `M ${x} ${y + h} L ${x + w / 2} ${y} L ${x + w} ${y + h}`;
+      break;
+    case 'down':
+      d = `M ${x} ${y} L ${x + w / 2} ${y + h} L ${x + w} ${y}`;
+      break;
+    default: // 'right'
+      d = `M ${x} ${y} L ${x + w} ${y + h / 2} L ${x} ${y + h}`;
+  }
+  return {
+    type: 'path',
+    attrs: { d, fill: 'none', stroke: fill || 'black', 'stroke-width': 3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+  };
+}
+
+/**
+ * Create a cross shape (X mark / multiplication sign).
+ *
+ * Drawn as two thick intersecting lines with rounded caps.
+ *
+ * @param cx - Center x coordinate (required)
+ * @param cy - Center y coordinate (required)
+ * @param arm - Half-length of each arm — total width/height is `arm * 2` (required)
+ * @param thickness - Stroke thickness of the cross lines (required)
+ * @param fill - Color of the cross (optional, used as stroke color). Default: `'black'`.
+ * @returns A path SvgDef with stroke-linecap="round"
+ *
+ * @example
+ * // Cross centered at (50,50), arm 30, thickness 8
+ * cross(50, 50, 30, 8, 'red')
+ */
+export function cross(cx: number, cy: number, arm: number, thickness: number, fill?: string): SvgDef {
+  const d = `M ${cx - arm} ${cy - arm} L ${cx + arm} ${cy + arm} M ${cx + arm} ${cy - arm} L ${cx - arm} ${cy + arm}`;
+  return {
+    type: 'path',
+    attrs: { d, fill: 'none', stroke: fill || 'black', 'stroke-width': thickness, 'stroke-linecap': 'round' },
+  };
+}
+
+/**
+ * Create a plus sign shape (+).
+ *
+ * Drawn as two thick intersecting perpendicular lines with rounded caps.
+ *
+ * @param cx - Center x coordinate (required)
+ * @param cy - Center y coordinate (required)
+ * @param arm - Half-length of each arm — total width/height is `arm * 2` (required)
+ * @param thickness - Stroke thickness of the plus lines (required)
+ * @param fill - Color of the plus (optional, used as stroke color). Default: `'black'`.
+ * @returns A path SvgDef with stroke-linecap="round"
+ *
+ * @example
+ * // Plus centered at (50,50), arm 25, thickness 8
+ * plus(50, 50, 25, 8, 'green')
+ */
+export function plus(cx: number, cy: number, arm: number, thickness: number, fill?: string): SvgDef {
+  const d = `M ${cx - arm} ${cy} L ${cx + arm} ${cy} M ${cx} ${cy - arm} L ${cx} ${cy + arm}`;
+  return {
+    type: 'path',
+    attrs: { d, fill: 'none', stroke: fill || 'black', 'stroke-width': thickness, 'stroke-linecap': 'round' },
+  };
+}
+
+/**
+ * Create a diamond shape (rotated square / rhombus).
+ *
+ * @param cx - Center x coordinate (required)
+ * @param cy - Center y coordinate (required)
+ * @param rx - Half-width of the diamond (required)
+ * @param ry - Half-height of the diamond (required)
+ * @param fill - Fill color (optional). Default: undefined (transparent).
+ * @returns A polygon SvgDef with four points
+ *
+ * @example
+ * // Diamond centered at (50,50), width 60, height 40
+ * diamond(50, 50, 30, 20, 'purple')
+ */
+export function diamond(cx: number, cy: number, rx: number, ry: number, fill?: string): SvgDef {
+  const points = `${cx} ${cy - ry}, ${cx + rx} ${cy}, ${cx} ${cy + ry}, ${cx - rx} ${cy}`;
+  return { type: 'polygon', attrs: { points, fill } };
+}
+
+/**
+ * Create a heart shape using cubic bezier curves.
+ *
+ * The heart's size is controlled by the `size` parameter — larger values
+ * produce a bigger heart. The heart points downward.
+ *
+ * @param cx - Center x coordinate (the notch between the top bumps) (required)
+ * @param cy - Y coordinate of the notch (required)
+ * @param size - Scale factor controlling overall size (required). At `size=1`, the heart is about 2 units tall.
+ * @param fill - Fill color (optional). Default: `'red'`.
+ * @returns A path SvgDef with fill
+ *
+ * @example
+ * // Red heart centered at (50,50), size 40
+ * heart(50, 50, 40, 'crimson')
+ */
+export function heart(cx: number, cy: number, size: number, fill?: string): SvgDef {
+  const s = size;
+  const d = `M ${cx} ${cy + s * 0.25} C ${cx - s * 0.5} ${cy - s * 0.5} ${cx - s} ${cy + s * 0.1} ${cx} ${cy + s} C ${cx + s} ${cy + s * 0.1} ${cx + s * 0.5} ${cy - s * 0.5} ${cx} ${cy + s * 0.25} Z`;
+  return { type: 'path', attrs: { d, fill: fill || 'red', stroke: 'none' } };
+}
+
+/**
+ * Create a donut shape (circle with a hole).
+ *
+ * Uses `fill-rule="evenodd"` so the inner circle is transparent.
+ *
+ * @param cx - Center x coordinate (required)
+ * @param cy - Center y coordinate (required)
+ * @param outerR - Outer radius of the donut (required)
+ * @param innerR - Inner radius (hole) of the donut (required). Must be less than `outerR`.
+ * @param fill - Fill color (optional). Default: `'currentColor'`.
+ * @returns A path SvgDef with fill-rule="evenodd"
+ *
+ * @example
+ * // Donut centered at (50,50), outer radius 40, inner radius 20
+ * donut(50, 50, 40, 20, 'chocolate')
+ */
+export function donut(cx: number, cy: number, outerR: number, innerR: number, fill?: string): SvgDef {
+  const d = `M ${cx - outerR} ${cy} A ${outerR} ${outerR} 0 1 0 ${cx + outerR} ${cy} A ${outerR} ${outerR} 0 1 0 ${cx - outerR} ${cy} M ${cx - innerR} ${cy} A ${innerR} ${innerR} 0 1 0 ${cx + innerR} ${cy} A ${innerR} ${innerR} 0 1 0 ${cx - innerR} ${cy} Z`;
+  return {
+    type: 'path',
+    attrs: { d, fill: fill || 'currentColor', 'fill-rule': 'evenodd', stroke: 'none' },
+  };
+}
+
+/**
+ * Create a gear / cog shape.
+ *
+ * Alternates between outer and inner teeth vertices to create a
+ * mechanical gear outline.
+ *
+ * @param cx - Center x coordinate (required)
+ * @param cy - Center y coordinate (required)
+ * @param outerR - Radius to the tip of each tooth (required)
+ * @param innerR - Radius to the base of each tooth (required)
+ * @param teeth - Number of teeth on the gear (required, minimum 3)
+ * @param fill - Fill color (optional). Default: `'currentColor'`.
+ * @returns A polygon SvgDef
+ *
+ * @example
+ * // 8-tooth gear centered at (50,50)
+ * gear(50, 50, 40, 30, 8, 'silver')
+ */
+export function gear(cx: number, cy: number, outerR: number, innerR: number, teeth: number, fill?: string): SvgDef {
+  const step = Math.PI / teeth;
+  const points: string[] = [];
+  for (let i = 0; i < teeth * 2; i++) {
+    const angle = step * i - Math.PI / 2;
+    const r = i % 2 === 0 ? outerR : innerR;
+    points.push(`${(cx + r * Math.cos(angle)).toFixed(2)},${(cy + r * Math.sin(angle)).toFixed(2)}`);
+  }
+  return { type: 'polygon', attrs: { points: points.join(' '), fill: fill || 'currentColor' } };
+}
+
+/**
+ * Create a spiral shape.
+ *
+ * Draws an Archimedean spiral from the center outward. The spiral
+ * makes `turns` full rotations, growing to `maxR` radius.
+ *
+ * @param cx - Center x coordinate (required)
+ * @param cy - Center y coordinate (required)
+ * @param turns - Number of full rotations (required)
+ * @param maxR - Maximum radius (the spiral grows from 0 to this value) (required)
+ * @param fill - Stroke color for the spiral line (optional). Default: `'currentColor'`.
+ * @returns A path SvgDef with no fill (just a stroke)
+ *
+ * @example
+ * // Spiral centered at (50,50) with 4 turns reaching radius 40
+ * spiral(50, 50, 4, 40, 'dodgerblue')
+ */
+export function spiral(cx: number, cy: number, turns: number, maxR: number, fill?: string): SvgDef {
+  const segments = Math.max(Math.round(turns * 36), 1);
+  let d = '';
+  for (let i = 0; i <= segments; i++) {
+    const t = (i / segments) * turns * 2 * Math.PI;
+    const r = (i / segments) * maxR;
+    const x = cx + r * Math.cos(t);
+    const y = cy + r * Math.sin(t);
+    d += `${i === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)} `;
+  }
+  return {
+    type: 'path',
+    attrs: { d: d.trim(), fill: 'none', stroke: fill || 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round' },
+  };
+}
+
+// ============================================================
 // Container Elements
 // ============================================================
 

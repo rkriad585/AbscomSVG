@@ -170,6 +170,148 @@ image('https://example.com/logo.png', 10, 10, 100, 100)
 
 ---
 
+## Built-in Complex Shapes
+
+Helpers that generate SVG path/polygon data for common shapes — no manual coordinate math needed.
+
+### regularPolygon
+
+```ts
+regularPolygon(cx: number, cy: number, sides: number, radius: number, fill?: string): SvgDef
+```
+
+Creates a regular polygon (triangle, hexagon, octagon, etc.). First vertex points up.
+
+```js
+regularPolygon(50, 50, 6, 40, 'dodgerblue')  // hexagon
+regularPolygon(100, 100, 3, 50, 'gold')       // triangle
+```
+
+### star
+
+```ts
+star(cx: number, cy: number, outerR: number, innerR: number, points: number, fill?: string): SvgDef
+```
+
+Creates a star shape by alternating outer/inner vertices.
+
+```js
+star(50, 50, 40, 16, 5, 'gold')   // 5-point star
+star(50, 50, 30, 10, 4, 'yellow') // 4-point sparkle
+```
+
+### arrow
+
+```ts
+arrow(x1: number, y1: number, x2: number, y2: number, fill?: string): SvgDef
+```
+
+A line from (x1,y1) to (x2,y2) with a triangular arrowhead at the end. Stroke defaults to `'black'`.
+
+```js
+arrow(10, 50, 200, 50, 'crimson')
+arrow(20, 80, 180, 20, 'navy')
+```
+
+### chevron
+
+```ts
+chevron(x: number, y: number, w: number, h: number, dir?: 'right' | 'left' | 'up' | 'down', fill?: string): SvgDef
+```
+
+A V-shaped bracket. Direction defaults to `'right'`.
+
+```js
+chevron(0, 0, 40, 30, 'right', 'steelblue')
+chevron(0, 30, 40, 20, 'up')
+```
+
+### cross
+
+```ts
+cross(cx: number, cy: number, arm: number, thickness: number, fill?: string): SvgDef
+```
+
+An X mark drawn with two thick intersecting lines (rounded caps).
+
+```js
+cross(50, 50, 30, 8, 'red')
+```
+
+### plus
+
+```ts
+plus(cx: number, cy: number, arm: number, thickness: number, fill?: string): SvgDef
+```
+
+A + sign drawn with two thick perpendicular lines (rounded caps).
+
+```js
+plus(50, 50, 25, 8, 'green')
+```
+
+### diamond
+
+```ts
+diamond(cx: number, cy: number, rx: number, ry: number, fill?: string): SvgDef
+```
+
+A rhombus / rotated square.
+
+```js
+diamond(50, 50, 30, 20, 'purple')
+```
+
+### heart
+
+```ts
+heart(cx: number, cy: number, size: number, fill?: string): SvgDef
+```
+
+A heart shape using cubic bezier curves. Fill defaults to `'red'`.
+
+```js
+heart(50, 50, 40, 'crimson')
+```
+
+### donut
+
+```ts
+donut(cx: number, cy: number, outerR: number, innerR: number, fill?: string): SvgDef
+```
+
+A circle with a hole. Uses `fill-rule="evenodd"`.
+
+```js
+donut(50, 50, 40, 20, 'chocolate')
+```
+
+### gear
+
+```ts
+gear(cx: number, cy: number, outerR: number, innerR: number, teeth: number, fill?: string): SvgDef
+```
+
+A mechanical gear / cog outline.
+
+```js
+gear(50, 50, 40, 30, 8, 'silver')
+```
+
+### spiral
+
+```ts
+spiral(cx: number, cy: number, turns: number, maxR: number, fill?: string): SvgDef
+```
+
+An Archimedean spiral that grows from the center outward (drawn as a stroked path).
+
+```js
+spiral(50, 50, 4, 40, 'dodgerblue')
+```
+
+---
+
 ## Container Helpers
 
 ### svg

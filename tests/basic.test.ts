@@ -11,6 +11,17 @@ import {
   animate,
   animateTransform,
   animationSet,
+  regularPolygon,
+  star,
+  arrow,
+  chevron,
+  cross,
+  plus,
+  diamond,
+  heart,
+  donut,
+  gear,
+  spiral,
   withStroke,
   withClass,
   withStyle,
@@ -59,6 +70,7 @@ import {
   type SvgDef,
   type GradientStop,
   type TransformStep,
+  type ChevronDir,
 } from '../src/index';
 
 describe('element creation helpers', () => {
@@ -148,6 +160,143 @@ describe('element creation helpers', () => {
     expect(def.type).toBe('image');
     expect(def.attrs['xlink:href']).toBe('logo.png');
     expect(def.attrs.width).toBe(100);
+  });
+});
+
+describe('built-in complex shapes', () => {
+  test('regularPolygon (hexagon)', () => {
+    const def = regularPolygon(50, 50, 6, 40, 'dodgerblue');
+    expect(def.type).toBe('polygon');
+    expect(typeof def.attrs.points).toBe('string');
+    const pts = (def.attrs.points as string).split(' ');
+    expect(pts).toHaveLength(6);
+    expect(def.attrs.fill).toBe('dodgerblue');
+  });
+
+  test('regularPolygon without fill', () => {
+    const def = regularPolygon(0, 0, 3, 10);
+    expect(def.attrs.fill).toBeUndefined();
+  });
+
+  test('star (5-point)', () => {
+    const def = star(50, 50, 40, 16, 5, 'gold');
+    expect(def.type).toBe('polygon');
+    const pts = (def.attrs.points as string).split(' ');
+    expect(pts).toHaveLength(10);
+    expect(def.attrs.fill).toBe('gold');
+  });
+
+  test('star without fill', () => {
+    const def = star(0, 0, 10, 5, 4);
+    expect(def.attrs.fill).toBeUndefined();
+  });
+
+  test('arrow', () => {
+    const def = arrow(10, 50, 200, 50, 'crimson');
+    expect(def.type).toBe('path');
+    expect(def.attrs.d).toContain('M 10 50 L 200 50');
+    expect(def.attrs.stroke).toBe('crimson');
+    expect(def.attrs['stroke-width']).toBe(2);
+  });
+
+  test('arrow defaults fill to black', () => {
+    const def = arrow(0, 0, 100, 0);
+    expect(def.attrs.stroke).toBe('black');
+  });
+
+  test('chevron right (default)', () => {
+    const def = chevron(0, 0, 40, 30, 'right', 'steelblue');
+    expect(def.type).toBe('path');
+    expect(def.attrs.d).toContain('M 0 0 L 40 15 L 0 30');
+    expect(def.attrs.stroke).toBe('steelblue');
+  });
+
+  test('chevron left', () => {
+    const def = chevron(0, 0, 40, 30, 'left');
+    expect(def.attrs.d).toContain('M 40 0 L 0 15 L 40 30');
+  });
+
+  test('chevron up', () => {
+    const def = chevron(0, 30, 40, 20, 'up');
+    expect(def.attrs.d).toContain('M 0 50 L 20 30 L 40 50');
+  });
+
+  test('chevron down', () => {
+    const def = chevron(0, 0, 40, 20, 'down');
+    expect(def.attrs.d).toContain('M 0 0 L 20 20 L 40 0');
+  });
+
+  test('cross', () => {
+    const def = cross(50, 50, 30, 8, 'red');
+    expect(def.type).toBe('path');
+    expect(def.attrs.d).toContain('M 20 20 L 80 80');
+    expect(def.attrs.d).toContain('M 80 20 L 20 80');
+    expect(def.attrs.stroke).toBe('red');
+    expect(def.attrs['stroke-width']).toBe(8);
+  });
+
+  test('cross defaults to black', () => {
+    const def = cross(0, 0, 10, 3);
+    expect(def.attrs.stroke).toBe('black');
+  });
+
+  test('plus', () => {
+    const def = plus(50, 50, 25, 8, 'green');
+    expect(def.type).toBe('path');
+    expect(def.attrs.d).toContain('M 25 50 L 75 50');
+    expect(def.attrs.d).toContain('M 50 25 L 50 75');
+    expect(def.attrs.stroke).toBe('green');
+    expect(def.attrs['stroke-width']).toBe(8);
+  });
+
+  test('diamond', () => {
+    const def = diamond(50, 50, 30, 20, 'purple');
+    expect(def.type).toBe('polygon');
+    expect(def.attrs.fill).toBe('purple');
+    const pts = (def.attrs.points as string).split(',');
+    expect(pts).toHaveLength(4);
+  });
+
+  test('diamond without fill', () => {
+    const def = diamond(0, 0, 10, 10);
+    expect(def.attrs.fill).toBeUndefined();
+  });
+
+  test('heart', () => {
+    const def = heart(50, 50, 40, 'crimson');
+    expect(def.type).toBe('path');
+    expect(def.attrs.fill).toBe('crimson');
+    expect(def.attrs.d).toContain('C');
+  });
+
+  test('heart defaults fill to red', () => {
+    const def = heart(50, 50, 40);
+    expect(def.attrs.fill).toBe('red');
+  });
+
+  test('donut', () => {
+    const def = donut(50, 50, 40, 20, 'chocolate');
+    expect(def.type).toBe('path');
+    expect(def.attrs.fill).toBe('chocolate');
+    expect(def.attrs['fill-rule']).toBe('evenodd');
+    expect(def.attrs.d).toContain('A');
+  });
+
+  test('gear', () => {
+    const def = gear(50, 50, 40, 30, 8, 'silver');
+    expect(def.type).toBe('polygon');
+    expect(def.attrs.fill).toBe('silver');
+    const pts = (def.attrs.points as string).split(' ');
+    expect(pts).toHaveLength(16);
+  });
+
+  test('spiral', () => {
+    const def = spiral(50, 50, 3, 30, 'dodgerblue');
+    expect(def.type).toBe('path');
+    expect(def.attrs.stroke).toBe('dodgerblue');
+    expect(def.attrs['stroke-width']).toBe(2);
+    expect(def.attrs.d).toContain('M');
+    expect(def.attrs.d).toContain('L');
   });
 });
 
