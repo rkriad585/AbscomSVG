@@ -63,12 +63,35 @@ export {
   width,
   height,
   attrs,
-  toHex,
-  toRgb,
   PathBuilder,
 } from './elements';
+
+export {
+  toHex,
+  toRgb,
+  parseColor,
+  toRgba,
+  hsl,
+  hsla,
+  lighten,
+  darken,
+  saturate,
+  desaturate,
+  mix,
+  complementary,
+  analogous,
+  luminance,
+  isLight,
+  isDark,
+  contrastText,
+  randomColor,
+  randomPastel,
+  palette,
+  listPalettes,
+} from './color';
 
 export { render } from './renderer';
 export type { RenderOptions } from './renderer';
 export type { SvgDef, EventHandler, GradientStop } from './types';
+export type { Rgb, Rgba, Hsl } from './color';
 export type { TransformStep, ChevronDir } from './elements';

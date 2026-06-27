@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AbscomSVG — Color Playground</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 900px;
+      margin: 2rem auto;
+      background: #f8f9fa;
+      padding: 0 1rem;
+      color: #333;
+    }
+    .demo {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .demo h2 {
+      margin-top: 0;
+      font-size: 1.1rem;
+      color: #444;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 0.5rem;
+    }
+    .demo p { font-size: 0.9rem; color: #666; margin: 0.5rem 0 1rem; }
+    .swatch-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      margin: 0.75rem 0;
+    }
+    .swatch {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      font-size: 0.55rem;
+      color: #666;
+      padding-bottom: 2px;
+      box-sizing: border-box;
+    }
+    .controls {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+    .controls label { font-size: 0.85rem; }
+    .controls input[type="color"] {
+      width: 50px;
+      height: 36px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 2px;
+      cursor: pointer;
+    }
+    .controls input[type="range"] { width: 120px; }
+    .controls .value { font-size: 0.8rem; color: #888; min-width: 2.5rem; }
+    .result-row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+    .result-item { text-align: center; }
+    .result-item .swatch { width: 60px; height: 60px; }
+    .result-item label { display: block; font-size: 0.75rem; color: #888; margin-top: 0.2rem; }
+    code { background: #eef; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; }
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1rem;
+    }
+    .palette-card { border: 1px solid #eee; border-radius: 8px; padding: 0.75rem; }
+    .palette-card h3 { margin: 0 0 0.4rem; font-size: 0.9rem; color: #555; }
+    .palette-card .swatch-row { margin: 0; }
+  </style>
+</head>
+<body>
+
+<div class="demo">
+  <h2>Lighten &amp; Darken</h2>
+  <p>Move a color toward white or black.</p>
+  <div class="controls">
+    <label>Base color:</label>
+    <input type="color" id="ld-color" value="#e74c3c" />
+    <label>Amount:</label>
+    <input type="range" id="ld-amount" min="0" max="1" step="0.05" value="0.3" />
+    <span class="value" id="ld-amount-val">0.30</span>
+  </div>
+  <div class="result-row">
+    <div class="result-item">
+      <div class="swatch" id="ld-original"></div>
+      <label>Original</label>
+    </div>
+    <div class="result-item">
+      <div class="swatch" id="ld-lightened"></div>
+      <label>Lightened</label>
+    </div>
+    <div class="result-item">
+      <div class="swatch" id="ld-darkened"></div>
+      <label>Darkened</label>
+    </div>
+  </div>
+  <p style="font-size:0.85rem;color:#999;margin-top:0.75rem">
+    <code id="ld-code">lighten('#e74c3c', 0.30) → '#f09a90'</code>
+  </p>
+</div>
+
+<div class="demo">
+  <h2>Complementary &amp; Mix</h2>
+  <p>Find the opposite color or blend two colors.</p>
+  <div class="controls">
+    <label>Color A:</label>
+    <input type="color" id="mix-a" value="#e74c3c" />
+    <label>Color B:</label>
+    <input type="color" id="mix-b" value="#3498db" />
+    <label>Mix ratio:</label>
+    <input type="range" id="mix-ratio" min="0" max="1" step="0.05" value="0.5" />
+    <span class="value" id="mix-ratio-val">0.50</span>
+  </div>
+  <div class="result-row">
+    <div class="result-item">
+      <div class="swatch" id="mix-a-swatch"></div>
+      <label>A</label>
+    </div>
+    <div class="result-item">
+      <div class="swatch" id="mix-complement"></div>
+      <label>Complementary of A</label>
+    </div>
+    <div class="result-item">
+      <div class="swatch" id="mix-result"></div>
+      <label>A × B (mix)</label>
+    </div>
+    <div class="result-item">
+      <div class="swatch" id="mix-b-swatch"></div>
+      <label>B</label>
+    </div>
+  </div>
+  <p style="font-size:0.85rem;color:#999;margin-top:0.75rem">
+    <code id="mix-code">complementary('#e74c3c') → '#3ce74c'  |  mix('#e74c3c', '#3498db', 0.5) → '#8e728c'</code>
+  </p>
+</div>
+
+<div class="demo">
+  <h2>Contrast Text</h2>
+  <p>Choose a background color and see whether black or white text is more readable.</p>
+  <div class="controls">
+    <label>Background:</label>
+    <input type="color" id="contrast-bg" value="#3498db" />
+  </div>
+  <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+    <div id="contrast-black" style="padding:1rem 2rem;border-radius:8px;font-size:1.2rem;font-weight:bold;">
+      Black Text
+    </div>
+    <div id="contrast-white" style="padding:1rem 2rem;border-radius:8px;font-size:1.2rem;font-weight:bold;">
+      White Text
+    </div>
+  </div>
+  <p style="font-size:0.85rem;color:#999;margin-top:0.75rem">
+    Recommended: <code id="contrast-result">white</code>
+  </p>
+</div>
+
+<div class="demo">
+  <h2>Palettes</h2>
+  <p>Choose from 10 built-in color palettes.</p>
+  <div class="controls">
+    <select id="palette-select">
+      <option value="material">Material</option>
+      <option value="pastel">Pastel</option>
+      <option value="vibrant">Vibrant</option>
+      <option value="mono">Mono (Blue)</option>
+      <option value="sunset">Sunset</option>
+      <option value="ocean" selected>Ocean</option>
+      <option value="forest">Forest</option>
+      <option value="retro">Retro</option>
+      <option value="neon">Neon</option>
+      <option value="earth">Earth</option>
+    </select>
+  </div>
+  <div class="swatch-row" id="palette-swatches"></div>
+</div>
+
+<div class="demo">
+  <h2>All Palettes</h2>
+  <div class="palette-grid" id="all-palettes"></div>
+</div>
+
+<script src="/dist/abscomsvg.iife.js"></script>
+<script>
+  const { render, rect, circle, group, text } = AbscomSVG;
+
+  // ---- Lighten / Darken ----
+  const ldColor = document.getElementById('ld-color');
+  const ldAmount = document.getElementById('ld-amount');
+  const ldAmountVal = document.getElementById('ld-amount-val');
+  const ldOriginal = document.getElementById('ld-original');
+  const ldLightened = document.getElementById('ld-lightened');
+  const ldDarkened = document.getElementById('ld-darkened');
+  const ldCode = document.getElementById('ld-code');
+
+  function updateLightenDarken() {
+    const base = ldColor.value;
+    const amt = parseFloat(ldAmount.value);
+    ldAmountVal.textContent = amt.toFixed(2);
+    const l = AbscomSVG.lighten(base, amt);
+    const d = AbscomSVG.darken(base, amt);
+    ldOriginal.style.background = base;
+    ldLightened.style.background = l;
+    ldDarkened.style.background = d;
+    ldCode.textContent = `lighten('${base}', ${amt.toFixed(2)}) → '${l}'  |  darken('${base}', ${amt.toFixed(2)}) → '${d}'`;
+  }
+  ldColor.addEventListener('input', updateLightenDarken);
+  ldAmount.addEventListener('input', updateLightenDarken);
+  updateLightenDarken();
+
+  // ---- Complementary / Mix ----
+  const mixA = document.getElementById('mix-a');
+  const mixB = document.getElementById('mix-b');
+  const mixRatio = document.getElementById('mix-ratio');
+  const mixRatioVal = document.getElementById('mix-ratio-val');
+  const mixASwatch = document.getElementById('mix-a-swatch');
+  const mixBSwatch = document.getElementById('mix-b-swatch');
+  const mixComplement = document.getElementById('mix-complement');
+  const mixResult = document.getElementById('mix-result');
+  const mixCode = document.getElementById('mix-code');
+
+  function updateMix() {
+    const a = mixA.value;
+    const b = mixB.value;
+    const r = parseFloat(mixRatio.value);
+    mixRatioVal.textContent = r.toFixed(2);
+    mixASwatch.style.background = a;
+    mixBSwatch.style.background = b;
+    mixComplement.style.background = AbscomSVG.complementary(a);
+    mixResult.style.background = AbscomSVG.mix(a, b, r);
+    mixCode.textContent = `complementary('${a}') → '${AbscomSVG.complementary(a)}'  |  mix('${a}', '${b}', ${r.toFixed(2)}) → '${AbscomSVG.mix(a, b, r)}'`;
+  }
+  mixA.addEventListener('input', updateMix);
+  mixB.addEventListener('input', updateMix);
+  mixRatio.addEventListener('input', updateMix);
+  updateMix();
+
+  // ---- Contrast Text ----
+  const contrastBg = document.getElementById('contrast-bg');
+  const contrastBlack = document.getElementById('contrast-black');
+  const contrastWhite = document.getElementById('contrast-white');
+  const contrastResult = document.getElementById('contrast-result');
+
+  function updateContrast() {
+    const bg = contrastBg.value;
+    contrastBlack.style.background = bg;
+    contrastWhite.style.background = bg;
+    const rec = AbscomSVG.contrastText(bg);
+    contrastResult.textContent = rec;
+    contrastBlack.style.color = 'black';
+    contrastWhite.style.color = 'white';
+    // Highlight the recommended one
+    contrastBlack.style.outline = rec === 'black' ? '3px solid #2ecc71' : 'none';
+    contrastWhite.style.outline = rec === 'white' ? '3px solid #2ecc71' : 'none';
+  }
+  contrastBg.addEventListener('input', updateContrast);
+  updateContrast();
+
+  // ---- Palettes ----
+  const paletteSelect = document.getElementById('palette-select');
+  const paletteSwatches = document.getElementById('palette-swatches');
+
+  function renderPalette(container, colors) {
+    container.innerHTML = '';
+    colors.forEach(c => {
+      const swatch = document.createElement('div');
+      swatch.className = 'swatch';
+      swatch.style.background = c;
+      swatch.title = c;
+      container.appendChild(swatch);
+    });
+  }
+
+  function updateSelectedPalette() {
+    const name = paletteSelect.value;
+    const colors = AbscomSVG.palette(name);
+    renderPalette(paletteSwatches, colors);
+  }
+  paletteSelect.addEventListener('change', updateSelectedPalette);
+  updateSelectedPalette();
+
+  // ---- All Palettes ----
+  const allPalettes = document.getElementById('all-palettes');
+  const names = AbscomSVG.listPalettes();
+  names.forEach(name => {
+    const card = document.createElement('div');
+    card.className = 'palette-card';
+    const header = document.createElement('h3');
+    header.textContent = name;
+    card.appendChild(header);
+    const row = document.createElement('div');
+    row.className = 'swatch-row';
+    const colors = AbscomSVG.palette(name);
+    colors.forEach(c => {
+      const swatch = document.createElement('div');
+      swatch.className = 'swatch';
+      swatch.style.background = c;
+      swatch.title = c;
+      row.appendChild(swatch);
+    });
+    card.appendChild(row);
+    allPalettes.appendChild(card);
+  });
+</script>
+</body>
+</html>

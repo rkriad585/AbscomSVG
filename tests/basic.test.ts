@@ -66,11 +66,33 @@ import {
   attrs,
   toHex,
   toRgb,
+  parseColor,
+  toRgba,
+  hsl,
+  hsla,
+  lighten,
+  darken,
+  saturate,
+  desaturate,
+  mix,
+  complementary,
+  analogous,
+  luminance,
+  isLight,
+  isDark,
+  contrastText,
+  randomColor,
+  randomPastel,
+  palette,
+  listPalettes,
   PathBuilder,
   type SvgDef,
   type GradientStop,
   type TransformStep,
   type ChevronDir,
+  type Rgb,
+  type Rgba,
+  type Hsl,
 } from '../src/index';
 
 describe('element creation helpers', () => {
@@ -773,6 +795,156 @@ describe('color helpers', () => {
     expect(toRgb('#xyz')).toBeNull();
     expect(toRgb('not-a-color')).toBeNull();
     expect(toRgb('#fff00')).toBeNull();
+  });
+
+  test('parseColor hex 6-digit', () => {
+    const c = parseColor('#ff0000');
+    expect(c).toEqual({ r: 255, g: 0, b: 0, a: 1 });
+  });
+
+  test('parseColor hex 3-digit', () => {
+    expect(parseColor('#f00')).toEqual({ r: 255, g: 0, b: 0, a: 1 });
+  });
+
+  test('parseColor hex 8-digit (with alpha)', () => {
+    const c = parseColor('#ff000080');
+    expect(c).toEqual({ r: 255, g: 0, b: 0, a: 0.5 });
+  });
+
+  test('parseColor named', () => {
+    expect(parseColor('crimson')).toEqual({ r: 220, g: 20, b: 60, a: 1 });
+    expect(parseColor('dodgerblue')).toEqual({ r: 30, g: 144, b: 255, a: 1 });
+  });
+
+  test('parseColor rgb syntax', () => {
+    expect(parseColor('rgb(255, 0, 0)')).toEqual({ r: 255, g: 0, b: 0, a: 1 });
+  });
+
+  test('parseColor rgba syntax', () => {
+    expect(parseColor('rgba(255, 0, 0, 0.5)')).toEqual({ r: 255, g: 0, b: 0, a: 0.5 });
+  });
+
+  test('parseColor hsl syntax', () => {
+    const c = parseColor('hsl(0, 100%, 50%)');
+    expect(c!.r).toBe(255);
+    expect(c!.g).toBe(0);
+    expect(c!.b).toBe(0);
+    expect(c!.a).toBe(1);
+  });
+
+  test('parseColor returns null for invalid input', () => {
+    expect(parseColor('')).toBeNull();
+    expect(parseColor('not-a-color')).toBeNull();
+  });
+
+  test('toRgba', () => {
+    expect(toRgba(255, 0, 0)).toBe('rgba(255, 0, 0, 1)');
+    expect(toRgba(255, 0, 0, 0.5)).toBe('rgba(255, 0, 0, 0.5)');
+  });
+
+  test('hsl / hsla formatting', () => {
+    expect(hsl(0, 100, 50)).toBe('hsl(0, 100%, 50%)');
+    expect(hsla(120, 100, 50, 0.5)).toBe('hsla(120, 100%, 50%, 0.5)');
+  });
+
+  test('lighten', () => {
+    const l = lighten('#ff0000', 0.5);
+    expect(l).toBe('#ff8080');
+  });
+
+  test('lighten returns original for invalid input', () => {
+    expect(lighten('bad-color', 0.2)).toBe('bad-color');
+  });
+
+  test('darken', () => {
+    expect(darken('#ff0000', 0.5)).toBe('#800000');
+  });
+
+  test('saturate', () => {
+    const s = saturate('#808080', 0.5);
+    expect(s).not.toBe('#808080');
+  });
+
+  test('desaturate', () => {
+    const d = desaturate('#ff0000', 0.5);
+    // desaturated red should have lower saturation
+    expect(d).not.toBe('#ff0000');
+  });
+
+  test('mix blends two colors', () => {
+    expect(mix('red', 'blue', 0.5)).toBe('#800080');
+    expect(mix('red', 'blue', 0)).toBe('#ff0000');
+    expect(mix('red', 'blue', 1)).toBe('#0000ff');
+  });
+
+  test('mix returns color1 on parse failure', () => {
+    expect(mix('bad', '#fff', 0.5)).toBe('bad');
+  });
+
+  test('complementary', () => {
+    expect(complementary('#ff0000')).toBe('#00ffff');
+    expect(complementary('#00ff00')).toBe('#ff00ff');
+    expect(complementary('#0000ff')).toBe('#ffff00');
+  });
+
+  test('complementary returns original for invalid input', () => {
+    expect(complementary('bad')).toBe('bad');
+  });
+
+  test('analogous returns array of colors', () => {
+    const result = analogous('#ff0000', 3);
+    expect(result).toHaveLength(3);
+    result.forEach(c => expect(c).toMatch(/^#[0-9a-f]{6}$/));
+  });
+
+  test('analogous returns [original] for invalid input', () => {
+    expect(analogous('bad')).toEqual(['bad']);
+  });
+
+  test('luminance', () => {
+    expect(luminance('#000000')).toBe(0);
+    expect(luminance('#ffffff')).toBeCloseTo(1, 1);
+  });
+
+  test('isLight / isDark', () => {
+    expect(isLight('white')).toBe(true);
+    expect(isLight('black')).toBe(false);
+    expect(isDark('black')).toBe(true);
+    expect(isDark('white')).toBe(false);
+  });
+
+  test('contrastText', () => {
+    expect(contrastText('white')).toBe('black');
+    expect(contrastText('black')).toBe('white');
+    expect(contrastText('darkblue')).toBe('white');
+  });
+
+  test('randomColor returns valid hex', () => {
+    const c = randomColor();
+    expect(c).toMatch(/^#[0-9a-f]{6}$/);
+  });
+
+  test('randomPastel returns valid hex', () => {
+    const c = randomPastel();
+    expect(c).toMatch(/^#[0-9a-f]{6}$/);
+  });
+
+  test('palette returns array of hex colors', () => {
+    const p = palette('material');
+    expect(p.length).toBe(10);
+    p.forEach(c => expect(c).toMatch(/^#[0-9a-f]{6}$/));
+  });
+
+  test('palette returns empty array for unknown name', () => {
+    expect(palette('unknown' as any)).toEqual([]);
+  });
+
+  test('listPalettes returns all palette names', () => {
+    const names = listPalettes();
+    expect(names).toContain('material');
+    expect(names).toContain('pastel');
+    expect(names).toContain('vibrant');
+    expect(names.length).toBe(10);
   });
 });
 

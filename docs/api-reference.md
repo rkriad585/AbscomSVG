@@ -737,7 +737,26 @@ x(rect(10, 20, 100, 80)) // → 10
 
 ## Color Helpers
 
-### toHex
+Color parsing, manipulation, formatting, and built-in palettes — all pure math, no external dependencies.
+
+### Parsing & Formatting
+
+#### parseColor
+
+```ts
+parseColor(input: string): { r: number; g: number; b: number; a: number } | null
+```
+
+Parse any CSS color string into an RGBA object. Supports hex (`#rgb`, `#rrggbb`, `#rrggbbaa`), `rgb()`, `rgba()`, `hsl()`, `hsla()`, and 148 named CSS colors (e.g. `'crimson'`).
+
+```js
+parseColor('#ff0000')           // { r: 255, g: 0, b: 0, a: 1 }
+parseColor('rgba(255,0,0,0.5)') // { r: 255, g: 0, b: 0, a: 0.5 }
+parseColor('crimson')           // { r: 220, g: 20, b: 60, a: 1 }
+parseColor('bad-color')         // null
+```
+
+#### toHex
 
 ```ts
 toHex(r: number, g: number, b: number): string
@@ -750,7 +769,7 @@ toHex(255, 0, 0)      // → "#ff0000"
 toHex(300, -10, 128)  // → "#ff0080"
 ```
 
-### toRgb
+#### toRgb
 
 ```ts
 toRgb(hex: string): { r: number; g: number; b: number } | null
@@ -763,6 +782,189 @@ toRgb('#ff0000')  // → { r: 255, g: 0, b: 0 }
 toRgb('#f00')     // → { r: 255, g: 0, b: 0 }
 toRgb('ff0000')   // → { r: 255, g: 0, b: 0 }
 toRgb('#xyz')     // → null
+```
+
+#### toRgba
+
+```ts
+toRgba(r: number, g: number, b: number, a?: number): string
+```
+
+Build an `rgba()` CSS string. Default alpha = 1.
+
+```js
+toRgba(255, 0, 0)          // → "rgba(255, 0, 0, 1)"
+toRgba(255, 0, 0, 0.5)    // → "rgba(255, 0, 0, 0.5)"
+```
+
+#### hsl / hsla
+
+```ts
+hsl(h: number, s: number, l: number): string
+hsla(h: number, s: number, l: number, a: number): string
+```
+
+Build `hsl()` or `hsla()` CSS strings. Hue in degrees, saturation and lightness as percentages (0–100).
+
+```js
+hsl(0, 100, 50)              // → "hsl(0, 100%, 50%)"
+hsla(120, 100, 50, 0.5)     // → "hsla(120, 100%, 50%, 0.5)"
+```
+
+---
+
+### Manipulation
+
+#### lighten / darken
+
+```ts
+lighten(color: string, amount: number): string
+darken(color: string, amount: number): string
+```
+
+Move a color toward white (`lighten`) or black (`darken`). `amount` is 0–1, proportional to remaining distance.
+
+```js
+lighten('#ff0000', 0.3)  // → "#ff9999"
+darken('#ff0000', 0.3)   // → "#660000"
+```
+
+#### saturate / desaturate
+
+```ts
+saturate(color: string, amount: number): string
+desaturate(color: string, amount: number): string
+```
+
+Increase or decrease saturation in HSL space.
+
+```js
+saturate('#999', 0.5)    // more vivid
+desaturate('crimson', 0.5)  // more muted
+```
+
+#### mix
+
+```ts
+mix(color1: string, color2: string, ratio?: number): string
+```
+
+Blend two colors. `ratio` = 0 gives all color1, 1 gives all color2. Default 0.5.
+
+```js
+mix('red', 'blue', 0.5)  // → "#800080" (purple)
+mix('red', 'blue', 0.2)  // closer to red
+```
+
+#### complementary / analogous
+
+```ts
+complementary(color: string): string
+analogous(color: string, count?: number): string[]
+```
+
+`complementary` adds 180° to the hue. `analogous` returns adjacent colors (default 3).
+
+```js
+complementary('#ff0000')  // → "#00ffff" (cyan)
+analogous('#ff0000', 3)   // → ['#ff0000', ...adjacent hues...]
+```
+
+---
+
+### Luminance & Contrast
+
+#### luminance
+
+```ts
+luminance(color: string): number
+```
+
+WCAG relative luminance (0–1). Returns 0 for unparseable input.
+
+```js
+luminance('#ffffff')  // → ~1
+luminance('#000000')  // → 0
+```
+
+#### isLight / isDark
+
+```ts
+isLight(color: string): boolean
+isDark(color: string): boolean
+```
+
+```js
+isLight('white')   // → true
+isDark('white')    // → false
+```
+
+#### contrastText
+
+```ts
+contrastText(bgColor: string): string
+```
+
+Returns `'black'` or `'white'` for readable text on the given background.
+
+```js
+contrastText('white')     // → "black"
+contrastText('darkblue')  // → "white"
+```
+
+---
+
+### Random Colors
+
+#### randomColor
+
+```ts
+randomColor(): string
+```
+
+```js
+randomColor()  // → "#a3f17b"
+```
+
+#### randomPastel
+
+```ts
+randomPastel(): string
+```
+
+High lightness (~78%), medium saturation (~55%).
+
+```js
+randomPastel()  // → "#d4a1f0"
+```
+
+---
+
+### Palettes
+
+#### palette
+
+```ts
+palette(name: PaletteName): string[]
+```
+
+Get a named 10-color palette. Available: `'material'`, `'pastel'`, `'vibrant'`, `'mono'`, `'sunset'`, `'ocean'`, `'forest'`, `'retro'`, `'neon'`, `'earth'`.
+
+```js
+palette('material')  // → ['#f44336', '#e91e63', ...]
+palette('pastel')    // → ['#ffb3ba', '#ffdfba', ...]
+```
+
+#### listPalettes
+
+```ts
+listPalettes(): PaletteName[]
+```
+
+Returns all available palette names.
+
+```js
+listPalettes()  // → ['material', 'pastel', 'vibrant', ...]
 ```
 
 ---
