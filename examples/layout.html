@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AbscomSVG — Layout Helpers</title>
+  <style>
+    body { font-family: system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; background: #1a1a2e; color: #eee; gap: 32px; padding: 20px; }
+    h2 { margin: 0; }
+    h3 { margin: 0 0 4px; font-size: 0.9rem; color: #aaa; }
+    .row { display: flex; gap: 32px; flex-wrap: wrap; justify-content: center; }
+    .card { display: flex; flex-direction: column; align-items: center; }
+    svg { border-radius: 8px; background: #16213e; }
+    .responsive-demo { width: 100%; max-width: 600px; }
+    .responsive-demo svg { width: 100%; height: auto; }
+  </style>
+</head>
+<body>
+  <h2>Layout Helpers</h2>
+
+  <div class="card responsive-demo">
+    <h3>Responsive SVG (resize browser to see scaling)</h3>
+    <svg id="responsive-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h3>Grid</h3>
+      <svg id="grid-svg" width="300" height="300" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="card">
+      <h3>Vertical Stack</h3>
+      <svg id="stack-v-svg" width="150" height="300" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="card">
+      <h3>Horizontal Stack</h3>
+      <svg id="stack-h-svg" width="400" height="150" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+
+  <script src="/dist/abscomsvg.iife.js"></script>
+  <script>
+    const { circle, rect, responsiveSvg, autoViewBox, grid, stack, render } = AbscomSVG;
+
+    // --- Responsive SVG ---
+    {
+      const shapes = [
+        circle(300, 200, 80, '#e94560'),
+        rect(200, 100, 200, 200, 'rgba(15,52,96,0.5)'),
+      ];
+      const svgDef = responsiveSvg(600, 400, shapes);
+      render('responsive-svg', svgDef);
+    }
+
+    // --- Grid ---
+    {
+      const colors = ['#e94560', '#0f3460', '#533483', '#f5a623', '#1abc9c', '#e74c3c', '#3498db', '#2ecc71', '#f39c12'];
+      const dots = colors.map((c, i) => circle(15, 15, 12, c));
+      const arranged = grid(dots, 3, { cellWidth: 60, cellHeight: 60, x: 25, y: 25 });
+      render('grid-svg', arranged);
+    }
+
+    // --- Vertical Stack ---
+    {
+      const boxes = [
+        rect(0, 0, 80, 50, '#e94560'),
+        rect(0, 0, 80, 50, '#0f3460'),
+        rect(0, 0, 80, 50, '#533483'),
+      ];
+      const arranged = stack(boxes, 'vertical', { gap: 20, x: 35, y: 20 });
+      render('stack-v-svg', arranged);
+    }
+
+    // --- Horizontal Stack ---
+    {
+      const boxes = [
+        rect(0, 0, 80, 50, '#e94560'),
+        rect(0, 0, 80, 50, '#0f3460'),
+        rect(0, 0, 80, 50, '#533483'),
+      ];
+      const arranged = stack(boxes, 'horizontal', { gap: 20, x: 20, y: 50 });
+      render('stack-h-svg', arranged);
+    }
+  </script>
+</body>
+</html>

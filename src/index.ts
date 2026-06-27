@@ -114,6 +114,14 @@ export {
   hueRotate,
 } from './filters';
 
+export {
+  responsiveSvg,
+  autoViewBox,
+  grid,
+  stack,
+} from './layout';
+export type { GridOptions, StackOptions } from './layout';
+
 export { render } from './renderer';
 export type { RenderOptions } from './renderer';
 export type { SvgDef, EventHandler, GradientStop } from './types';

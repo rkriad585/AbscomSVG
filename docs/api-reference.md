@@ -1065,6 +1065,70 @@ listPalettes()  // → ['material', 'pastel', 'vibrant', ...]
 
 ---
 
+## Layout Helpers
+
+Helpers for responsive scaling, auto-computed viewBoxes, and arranging elements in grids or stacks.
+
+### responsiveSvg
+
+```ts
+responsiveSvg(viewBoxWidth: number, viewBoxHeight: number, children?: SvgDef | SvgDef[], attrs?: Record<string, unknown>): SvgDef
+```
+
+Creates an `<svg>` element with `width="100%"` and a `viewBox` for fluid scaling:
+
+```js
+responsiveSvg(800, 600, circle(400, 300, 100, 'red'))
+// → { type: 'svg', attrs: { width: '100%', viewBox: '0 0 800 600' }, children: [...] }
+```
+
+### autoViewBox
+
+```ts
+autoViewBox(defs: SvgDef[], padding?: number): string
+```
+
+Computes a `"minX minY width height"` viewBox string from an array of defs. Supports circles (cx/cy/r), ellipses (cx/cy/rx/ry), rects/images (x/y/width/height), lines (x1/y1/x2/y2), and text (x/y). Recurses into groups. Default padding is `10`. Returns `'0 0 100 100'` if no known shapes found.
+
+```js
+autoViewBox([circle(50, 50, 40, 'red')], 10)
+// → "0 0 100 100"  (bounding box with 10px padding)
+```
+
+### grid
+
+```ts
+grid(defs: SvgDef[], cols: number, options?: GridOptions): SvgDef[]
+```
+
+Arranges defs in a grid. Each def is wrapped in a `<g>` with `transform="translate(x,y)"`.
+
+Options: `cellWidth` (default 100), `cellHeight` (default 100), `x` (default 0), `y` (default 0).
+
+```js
+grid([dot1, dot2, dot3], 2, { cellWidth: 60, cellHeight: 60, x: 10, y: 10 })
+// → [ { type: 'g', attrs: { transform: 'translate(10,10)' }, ... },
+//      { type: 'g', attrs: { transform: 'translate(70,10)' }, ... },
+//      { type: 'g', attrs: { transform: 'translate(10,70)' }, ... } ]
+```
+
+### stack
+
+```ts
+stack(defs: SvgDef[], direction?: 'vertical' | 'horizontal', options?: StackOptions): SvgDef[]
+```
+
+Arranges defs in a vertical (default) or horizontal stack. Each def is wrapped in a `<g>` with `transform`. Sizes are determined from `width`/`height`/`r` attributes (falls back to 100).
+
+Options: `gap` (default 10), `x` (default 0), `y` (default 0).
+
+```js
+stack([redRect, greenRect], 'vertical', { gap: 15, x: 20, y: 20 })
+// → first at (20,20), second at (20,85)
+```
+
+---
+
 ## Filter Helpers
 
 SVG filter effects let you apply image-processing operations (blur, shadow, color shifts, etc.) to elements. These helpers build `<filter>` definitions that work inside `<defs>`.

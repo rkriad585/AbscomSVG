@@ -111,6 +111,10 @@ import {
   brightness,
   contrast,
   hueRotate,
+  responsiveSvg,
+  autoViewBox,
+  grid,
+  stack,
 } from '../src/index';
 
 describe('element creation helpers', () => {
@@ -1305,5 +1309,96 @@ describe('PathBuilder', () => {
     const pb = new PathBuilder();
     expect(pb.M(0, 0)).toBe(pb);
     expect(pb.clear()).toBe(pb);
+  });
+});
+
+describe('layout helpers', () => {
+  test('responsiveSvg sets width 100% and viewBox', () => {
+    const def = responsiveSvg(800, 600);
+    expect(def.type).toBe('svg');
+    expect(def.attrs.width).toBe('100%');
+    expect(def.attrs.viewBox).toBe('0 0 800 600');
+  });
+
+  test('responsiveSvg with children', () => {
+    const def = responsiveSvg(500, 300, circle(250, 150, 50, 'red'));
+    expect(def.children).toHaveLength(1);
+  });
+
+  test('responsiveSvg with extra attrs', () => {
+    const def = responsiveSvg(200, 200, undefined, { id: 'canvas' });
+    expect(def.attrs.id).toBe('canvas');
+  });
+
+  test('autoViewBox from circles', () => {
+    const defs = [circle(50, 50, 40, 'red')];
+    // bounding box: (10,10) to (90,90); with padding 10: (0,0) to (100,100)
+    expect(autoViewBox(defs, 10)).toBe('0 0 100 100');
+  });
+
+  test('autoViewBox from rects', () => {
+    const defs = [rect(0, 0, 100, 80, 'blue')];
+    expect(autoViewBox(defs, 5)).toBe('-5 -5 110 90');
+  });
+
+  test('autoViewBox from mixed shapes', () => {
+    const defs = [
+      circle(50, 50, 40, 'red'),      // extends to x:10..90, y:10..90
+      rect(80, 20, 100, 60, 'blue'),  // extends to x:80..180, y:20..80
+    ];
+    const vb = autoViewBox(defs, 10);
+    // overall: x:10..180, y:10..90; with padding 10: (0,0) to (190,100)
+    expect(vb).toBe('0 0 190 100');
+  });
+
+  test('autoViewBox from nested groups', () => {
+    const inner = circle(30, 30, 20, 'red');
+    const g = group([inner]);
+    expect(autoViewBox([g], 5)).toBe('5 5 50 50');
+  });
+
+  test('autoViewBox returns default for empty defs', () => {
+    expect(autoViewBox([], 10)).toBe('0 0 100 100');
+  });
+
+  test('grid arranges defs in columns', () => {
+    const defs = [circle(10, 10, 5), circle(10, 10, 5), circle(10, 10, 5)];
+    const result = grid(defs, 2, { cellWidth: 60, cellHeight: 60 });
+    expect(result).toHaveLength(3);
+    // first: translate(0,0)
+    expect(result[0].attrs.transform).toBe('translate(0,0)');
+    // second: col 1, row 0
+    expect(result[1].attrs.transform).toBe('translate(60,0)');
+    // third: col 0, row 1
+    expect(result[2].attrs.transform).toBe('translate(0,60)');
+  });
+
+  test('grid with custom start position', () => {
+    const defs = [circle(10, 10, 5), circle(10, 10, 5)];
+    const result = grid(defs, 2, { cellWidth: 80, cellHeight: 80, x: 20, y: 30 });
+    expect(result[0].attrs.transform).toBe('translate(20,30)');
+    expect(result[1].attrs.transform).toBe('translate(100,30)');
+  });
+
+  test('stack vertical', () => {
+    const defs = [rect(0, 0, 100, 50, 'red'), rect(0, 0, 100, 50, 'green')];
+    const result = stack(defs, 'vertical', { gap: 10, x: 5, y: 5 });
+    expect(result).toHaveLength(2);
+    expect(result[0].attrs.transform).toBe('translate(5,5)');
+    // second item: 50 (height) + 10 (gap) below first
+    expect(result[1].attrs.transform).toBe('translate(5,65)');
+  });
+
+  test('stack horizontal', () => {
+    const defs = [rect(0, 0, 80, 50, 'red'), rect(0, 0, 80, 50, 'green')];
+    const result = stack(defs, 'horizontal', { gap: 20 });
+    expect(result[0].attrs.transform).toBe('translate(0,0)');
+    expect(result[1].attrs.transform).toBe('translate(100,0)');
+  });
+
+  test('stack defaults to vertical', () => {
+    const defs = [rect(0, 0, 50, 30, 'red')];
+    const result = stack(defs);
+    expect(result[0].attrs.transform).toBe('translate(0,0)');
   });
 });

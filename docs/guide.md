@@ -526,6 +526,58 @@ transform('matrix', 1, 0, 0, 1, 0, 0)  // → "matrix(1,0,0,1,0,0)"
 
 ---
 
+## Layout Helpers
+
+Layout helpers arrange elements, create responsive SVGs, and compute viewBoxes.
+
+### Responsive SVG
+
+`responsiveSvg()` creates an `<svg>` that scales to fit its container:
+
+```js
+const svgDef = responsiveSvg(800, 600, circle(400, 300, 100, 'red'))
+// width="100%", viewBox="0 0 800 600" → scales fluidly
+```
+
+Use `autoViewBox()` to compute a `viewBox` from existing definitions:
+
+```js
+const shapes = [
+  circle(50, 50, 40, 'red'),
+  rect(80, 20, 100, 60, 'blue'),
+]
+const vb = autoViewBox(shapes, 10)
+// → "0 0 190 100"  (tight bounding box + 10px padding)
+```
+
+### Grid
+
+`grid()` arranges defs into a grid. Each def keeps its local coordinates — it's wrapped in a `<g>` with `transform`:
+
+```js
+const dots = [1, 2, 3, 4].map(n =>
+  circle(10, 10, 8, palette('vibrant')[n - 1])
+)
+const arranged = grid(dots, 2, { cellWidth: 40, cellHeight: 40, x: 20, y: 20 })
+render('#mySvg', arranged)
+```
+
+### Stack
+
+`stack()` arranges defs vertically or horizontally with a gap between them:
+
+```js
+const boxes = [1, 2, 3].map(n =>
+  rect(0, 0, 80, 50, palette('pastel')[n])
+)
+const arranged = stack(boxes, 'vertical', { gap: 15, x: 10, y: 10 })
+// Items are placed at (10,10), (10,75), (10,140)
+```
+
+The stack direction defaults to `'vertical'`. For horizontal, pass `'horizontal'`.
+
+---
+
 ## Style Utilities
 
 All style utilities **mutate** the def in-place and return it (for chaining).
