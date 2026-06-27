@@ -1,8 +1,11 @@
-# AbscomSVG
+# AbscomSVG v0.02.963
 
 A lightweight TypeScript framework for dynamic SVG generation and manipulation â€” works in browsers, Node.js, and Bun.
 
+**Author:** [rkriad585](https://github.com/rkriad585)
+
 [![npm](https://img.shields.io/npm/v/abscomsvg)](https://www.npmjs.com/package/abscomsvg)
+[![license](https://img.shields.io/npm/l/abscomsvg)](LICENSE)
 
 ## Documentation
 
@@ -21,7 +24,7 @@ A lightweight TypeScript framework for dynamic SVG generation and manipulation â
 
 ```html
 <svg id="canvas" width="300" height="200" xmlns="http://www.w3.org/2000/svg"></svg>
-<script src="https://unpkg.com/abscomsvg@2"></script>
+<script src="https://unpkg.com/abscomsvg@0.02.963"></script>
 <script>
   AbscomSVG.render('canvas', [
     AbscomSVG.circle(80, 80, 50, 'tomato'),

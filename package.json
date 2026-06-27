@@ -1,7 +1,11 @@
 {
   "name": "abscomsvg",
-  "version": "2.0.0",
+  "version": "0.02.963",
   "description": "Lightweight JavaScript framework for dynamic SVG generation and manipulation",
+  "author": {
+    "name": "rkriad585",
+    "url": "https://github.com/rkriad585"
+  },
   "type": "module",
   "main": "./dist/abscomsvg.cjs",
   "module": "./dist/abscomsvg.mjs",

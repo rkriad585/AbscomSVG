@@ -17,7 +17,7 @@ bun add abscomsvg
 ### CDN (browser only)
 
 ```html
-<script src="https://unpkg.com/abscomsvg@2"></script>
+<script src="https://unpkg.com/abscomsvg@0.02.963"></script>
 <script>
   AbscomSVG.circle(50, 50, 40, 'red');
 </script>
@@ -43,7 +43,7 @@ render('myCanvas', def);
 ```html
 <svg id="myCanvas" width="400" height="400" xmlns="http://www.w3.org/2000/svg"></svg>
 
-<script src="https://unpkg.com/abscomsvg@2"></script>
+<script src="https://unpkg.com/abscomsvg@0.02.963"></script>
 <script>
   AbscomSVG.render('myCanvas', AbscomSVG.circle(50, 50, 40, 'red'));
 </script>
@@ -74,7 +74,7 @@ console.log(serialize(def));
 ```html
 <svg id="canvas" width="300" height="200" xmlns="http://www.w3.org/2000/svg"></svg>
 
-<script src="https://unpkg.com/abscomsvg@2"></script>
+<script src="https://unpkg.com/abscomsvg@0.02.963"></script>
 <script>
   AbscomSVG.render('canvas', [
     AbscomSVG.circle(80, 80, 50, 'tomato'),
