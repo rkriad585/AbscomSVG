@@ -578,6 +578,66 @@ The stack direction defaults to `'vertical'`. For horizontal, pass `'horizontal'
 
 ---
 
+## Theming
+
+Use `$section.key` tokens in attribute values and apply a theme with `applyTheme()`:
+
+```js
+// 1. Define a theme
+const theme = {
+  colors: { primary: '#e94560', secondary: '#0f3460', bg: '#1a1a2e' },
+  fonts: { body: 'system-ui, sans-serif' },
+  sizes: { sm: 8, md: 16, lg: 32 },
+}
+
+// 2. Use tokens in your definitions
+const shapes = [
+  circle(50, 50, 30, '$colors.primary'),
+  rect(80, 20, 100, 60, '$colors.secondary'),
+]
+
+// 3. Apply the theme (mutates in-place)
+applyTheme(shapes, theme)
+// shapes[0].attrs.fill → '#e94560'
+// shapes[1].attrs.fill → '#0f3460'
+```
+
+`applyTheme()` recurses into nested children and also replaces tokens in `text` content. Unknown tokens like `$colors.nonexistent` are left unchanged. A pre-built `neutralTheme` is available for quick prototyping.
+
+---
+
+## Serialization
+
+Generate SVG strings for saving, sharing, or embedding.
+
+### toInlineSvg
+
+Works in any runtime — no DOM required:
+
+```js
+const svgString = toInlineSvg(circle(50, 50, 30, 'red'))
+// → '<svg xmlns="..."><circle cx="50" cy="50" r="30" fill="red"/></svg>'
+```
+
+### toDataUri
+
+Encode an SVG string as a data URI for use in `<img>` tags or CSS:
+
+```js
+const uri = toDataUri(toInlineSvg(circle(50, 50, 30, 'red')))
+// → 'data:image/svg+xml;charset=utf-8,...'
+```
+
+### downloadSvg
+
+Trigger a browser file download (browser-only):
+
+```js
+downloadSvg(circle(50, 50, 30, 'red'), 'circle.svg')
+```
+
+---
+
 ## Style Utilities
 
 All style utilities **mutate** the def in-place and return it (for chaining).

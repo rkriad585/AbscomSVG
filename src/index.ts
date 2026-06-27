@@ -122,6 +122,11 @@ export {
 } from './layout';
 export type { GridOptions, StackOptions } from './layout';
 
+export { applyTheme, neutralTheme } from './theme';
+export type { Theme } from './theme';
+
+export { toInlineSvg, toDataUri, downloadSvg } from './serialize';
+
 export { render } from './renderer';
 export type { RenderOptions } from './renderer';
 export type { SvgDef, EventHandler, GradientStop } from './types';

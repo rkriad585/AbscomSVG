@@ -1129,6 +1129,93 @@ stack([redRect, greenRect], 'vertical', { gap: 15, x: 20, y: 20 })
 
 ---
 
+## Theming
+
+Theme support using token replacement — write `$section.key` in attribute values and apply a theme object.
+
+### Theme
+
+```ts
+interface Theme {
+  colors?: Record<string, string>;
+  fonts?: Record<string, string>;
+  sizes?: Record<string, number | string>;
+  radii?: Record<string, number | string>;
+  borders?: Record<string, string>;
+  shadows?: Record<string, string>;
+}
+```
+
+### neutralTheme
+
+A pre-built neutral/gray theme with sensible defaults for all token categories.
+
+### applyTheme
+
+```ts
+applyTheme(def: SvgDef | SvgDef[], theme: Theme): SvgDef | SvgDef[]
+```
+
+Walks the def tree and replaces `$section.key` tokens. **Mutates** the input in-place.
+
+```js
+const theme = {
+  colors: { primary: '#e94560', secondary: '#0f3460' },
+};
+const el = circle(50, 50, 30, '$colors.primary');
+applyTheme(el, theme);
+// el.attrs.fill → '#e94560'
+```
+
+Supports any `$section.key` pattern in both attribute values and `text` content. Recurses into children. Unknown tokens are left as-is.
+
+---
+
+## Serialization
+
+Convert definitions to SVG markup strings or data URIs, and trigger browser downloads.
+
+### toInlineSvg
+
+```ts
+toInlineSvg(def: SvgDef | SvgDef[]): string
+```
+
+Serializes defs to an SVG markup string. Works in any runtime (no DOM required). If the top-level def is an `<svg>` element, it's used directly. Otherwise, defs are wrapped in a default `<svg>`.
+
+```js
+toInlineSvg(circle(50, 50, 30, 'red'))
+// → '<svg xmlns="..."><circle cx="50" cy="50" r="30" fill="red"/></svg>'
+```
+
+### toDataUri
+
+```ts
+toDataUri(svgString: string): string
+```
+
+Encodes an SVG string as a `data:image/svg+xml` URI.
+
+```js
+const svg = toInlineSvg(circle(50, 50, 30, 'red'));
+const uri = toDataUri(svg);
+// → 'data:image/svg+xml;charset=utf-8,...'
+```
+
+### downloadSvg
+
+```ts
+downloadSvg(input: string | SvgDef | SvgDef[], filename?: string): void
+```
+
+**Browser-only.** Triggers a file download of an SVG. Accepts a raw string or def(s). Default filename: `'download.svg'`.
+
+```js
+downloadSvg(circle(50, 50, 30, 'red'), 'circle.svg');
+```
+
+---
+
 ## Filter Helpers
 
 SVG filter effects let you apply image-processing operations (blur, shadow, color shifts, etc.) to elements. These helpers build `<filter>` definitions that work inside `<defs>`.

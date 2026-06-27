@@ -115,6 +115,10 @@ import {
   autoViewBox,
   grid,
   stack,
+  applyTheme,
+  neutralTheme,
+  toInlineSvg,
+  toDataUri,
 } from '../src/index';
 
 describe('element creation helpers', () => {
@@ -1418,5 +1422,96 @@ describe('layout helpers', () => {
     const defs = [rect(0, 0, 50, 30, 'red')];
     const result = stack(defs);
     expect(result[0].attrs.transform).toBe('translate(0,0)');
+  });
+});
+
+describe('theming', () => {
+  const theme = {
+    colors: { primary: '#e94560', secondary: '#0f3460', bg: '#1a1a2e' },
+    fonts: { body: 'system-ui, sans-serif' },
+    sizes: { sm: 8, md: 16, lg: 32 },
+  };
+
+  test('applyTheme replaces token in attr', () => {
+    const def = circle(50, 50, 30, '$colors.primary');
+    applyTheme(def, theme);
+    expect(def.attrs.fill).toBe('#e94560');
+  });
+
+  test('applyTheme replaces token in text content', () => {
+    const def = { type: 'text', attrs: { x: 10, y: 20 }, text: '$colors.primary' };
+    applyTheme(def, theme);
+    expect(def.text).toBe('#e94560');
+  });
+
+  test('applyTheme leaves unknown tokens unchanged', () => {
+    const def = circle(50, 50, 30, '$colors.nonexistent');
+    applyTheme(def, theme);
+    expect(def.attrs.fill).toBe('$colors.nonexistent');
+  });
+
+  test('applyTheme handles array of defs', () => {
+    const defs = [
+      circle(10, 10, 5, '$colors.primary'),
+      rect(0, 0, 20, 20, '$colors.secondary'),
+    ];
+    applyTheme(defs, theme);
+    expect(defs[0].attrs.fill).toBe('#e94560');
+    expect(defs[1].attrs.fill).toBe('#0f3460');
+  });
+
+  test('applyTheme recurses into children', () => {
+    const g = {
+      type: 'g' as const,
+      attrs: {},
+      children: [
+        circle(10, 10, 5, '$colors.primary'),
+        { type: 'g' as const, attrs: {}, children: [rect(0, 0, 10, 10, '$colors.secondary')] },
+      ],
+    };
+    applyTheme(g, theme);
+    expect(g.children![0].attrs.fill).toBe('#e94560');
+    expect((g.children![1] as any).children![0].attrs.fill).toBe('#0f3460');
+  });
+
+  test('neutralTheme has expected structure', () => {
+    expect(neutralTheme.colors).toBeDefined();
+    expect(neutralTheme.colors!.primary).toBe('#333333');
+    expect(neutralTheme.fonts!.body).toBe('system-ui, sans-serif');
+    expect(neutralTheme.sizes!.lg).toBe(24);
+  });
+});
+
+describe('serialization', () => {
+  test('toInlineSvg serializes a single def', () => {
+    const result = toInlineSvg(circle(50, 50, 30, 'red'));
+    expect(result).toContain('<svg');
+    expect(result).toContain('<circle');
+    expect(result).toContain('cx="50"');
+    expect(result).toContain('cy="50"');
+    expect(result).toContain('r="30"');
+    expect(result).toContain('fill="red"');
+    expect(result).toContain('</svg>');
+  });
+
+  test('toInlineSvg serializes an svg def directly', () => {
+    const def = { type: 'svg', attrs: { xmlns: 'http://www.w3.org/2000/svg', width: 100, height: 100 }, children: [circle(50, 50, 30, 'blue')] };
+    const result = toInlineSvg(def);
+    expect(result).toContain('<svg');
+    expect(result).toContain('width="100"');
+    expect(result).toContain('</svg>');
+  });
+
+  test('toInlineSvg with text content', () => {
+    const def = { type: 'text', attrs: { x: 10, y: 20 }, text: 'Hello' };
+    const result = toInlineSvg(def);
+    expect(result).toContain('>Hello<');
+  });
+
+  test('toDataUri returns a valid data URI', () => {
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="red"/></svg>';
+    const uri = toDataUri(svg);
+    expect(uri).toMatch(/^data:image\/svg\+xml;charset=utf-8,/);
+    expect(uri).toContain(encodeURIComponent(svg));
   });
 });

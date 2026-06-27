@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AbscomSVG — Theming &amp; Serialization</title>
+  <style>
+    body { font-family: system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; background: #1a1a2e; color: #eee; gap: 24px; padding: 20px; }
+    h2 { margin: 0; }
+    h3 { margin: 0 0 4px; font-size: 0.9rem; color: #aaa; }
+    .row { display: flex; gap: 32px; flex-wrap: wrap; justify-content: center; }
+    .card { display: flex; flex-direction: column; align-items: center; }
+    svg { border-radius: 8px; background: #16213e; }
+    button { padding: 8px 20px; border: none; border-radius: 6px; background: #0f3460; color: #fff; cursor: pointer; font-size: 0.9rem; margin: 4px; }
+    button:hover { background: #1a5276; }
+    pre { background: #16213e; padding: 12px; border-radius: 8px; max-width: 600px; overflow-x: auto; font-size: 0.8rem; color: #aabbcc; }
+  </style>
+</head>
+<body>
+  <h2>Theming &amp; Serialization</h2>
+
+  <div class="row">
+    <div class="card">
+      <h3>Default (no theme)</h3>
+      <svg id="default-svg" width="250" height="150" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="card">
+      <h3>After applyTheme</h3>
+      <svg id="themed-svg" width="250" height="150" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="card">
+      <h3>neutralTheme</h3>
+      <svg id="neutral-svg" width="250" height="150" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+
+  <div>
+    <button id="serialize-btn">Show SVG Source</button>
+    <button id="download-btn">Download SVG</button>
+  </div>
+
+  <pre id="source-output">(click a button to see SVG source)</pre>
+
+  <script src="/dist/abscomsvg.iife.js"></script>
+  <script>
+    const { circle, rect, group, applyTheme, neutralTheme, toInlineSvg, toDataUri, downloadSvg, render } = AbscomSVG;
+
+    // --- Define token-based shapes ---
+    function makeShapes(prefix) {
+      return [
+        circle(60, 60, 40, '$colors.primary'),
+        rect(120, 30, 100, 60, '$colors.secondary'),
+        circle(60, 130, 15, '$colors.accent'),
+        rect(140, 110, 60, 25, '$colors.muted'),
+      ];
+    }
+
+    // 1. Render without theme (tokens visible as-is)
+    render('default-svg', makeShapes());
+
+    // 2. Render with custom theme
+    {
+      const theme = {
+        colors: { primary: '#e94560', secondary: '#0f3460', accent: '#533483', muted: '#1a5276' },
+      };
+      const themed = makeShapes();
+      applyTheme(themed, theme);
+      render('themed-svg', themed);
+    }
+
+    // 3. Render with neutralTheme
+    {
+      const neutral = makeShapes();
+      applyTheme(neutral, neutralTheme);
+      render('neutral-svg', neutral);
+    }
+
+    // --- Serialization demo ---
+    const shapes = makeShapes();
+    applyTheme(shapes, {
+      colors: { primary: '#e94560', secondary: '#0f3460', accent: '#533483', muted: '#1a5276' },
+    });
+
+    document.getElementById('serialize-btn').addEventListener('click', () => {
+      const svgString = toInlineSvg(shapes);
+      document.getElementById('source-output').textContent = svgString;
+    });
+
+    document.getElementById('download-btn').addEventListener('click', () => {
+      downloadSvg(shapes, 'themed-shapes.svg');
+    });
+  </script>
+</body>
+</html>
