@@ -165,7 +165,8 @@ function createElement(def: SvgDef, options?: RenderOptions): SVGElement | null 
   }
 
   if (def.children) {
-    for (const childDef of def.children) {
+    const childArr = Array.isArray(def.children) ? def.children : [def.children];
+    for (const childDef of childArr) {
       const childEl = createElement(childDef, options);
       if (childEl) el.appendChild(childEl);
     }

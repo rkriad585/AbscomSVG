@@ -373,6 +373,11 @@ describe('new container elements', () => {
     expect(def.children).toBeUndefined();
   });
 
+  test('group with single def (auto-array)', () => {
+    const def = group(circle(10, 10, 5));
+    expect(def.children).toHaveLength(1);
+  });
+
   test('defs', () => {
     const def = defs([linearGradient('g1', 0, 0, 1, 0)]);
     expect(def.type).toBe('defs');

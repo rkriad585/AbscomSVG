@@ -572,7 +572,7 @@ export function svg(
  *
  * Attributes set on the group are inherited by all children. For example, setting `fill` on a group applies that fill to every child that doesn't have its own fill. This is useful for applying transforms or styles to multiple elements at once.
  *
- * @param children - Array of child SvgDefs to group together (optional). Default: empty group.
+ * @param children - Child SvgDefs to group together. Pass a single SvgDef or an array (optional). Default: empty group.
  * @param attrs - Attributes inherited by all children. Common uses: `{ fill: 'red' }`, `{ stroke: 'black', 'stroke-width': 2 }`, `{ transform: translate(10, 10) }`, `{ opacity: 0.5 }`.
  * @returns A group SvgDef
  *
@@ -581,11 +581,16 @@ export function svg(
  * group([circle(10, 10, 5), rect(0, 0, 20, 20)], { fill: 'red' })
  *
  * @example
+ * // Single child (auto-wrapped in array)
+ * group(circle(10, 10, 5))
+ *
+ * @example
  * // Empty group (useful as a placeholder or container)
  * group()
  */
-export function group(children?: SvgDef[], attrs?: Record<string, unknown>): SvgDef {
-  return { type: 'g', attrs: { ...attrs }, ...(children && { children }) };
+export function group(children?: SvgDef | SvgDef[], attrs?: Record<string, unknown>): SvgDef {
+  const childArr = children ? (Array.isArray(children) ? children : [children]) : undefined;
+  return { type: 'g', attrs: { ...attrs }, ...(childArr && { children: childArr }) };
 }
 
 /**
