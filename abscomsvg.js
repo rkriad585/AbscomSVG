@@ -182,6 +182,8 @@
     }
   };
 
+  const eventHandlerMap = new WeakMap();
+
   /**
    * Creates an SVG element from a definition object.
    * @param {Object} def - Element definition.
@@ -196,16 +198,18 @@
     }
     if (def.text) el.textContent = def.text;
     if (def.events) {
+      const handlers = {};
       for (const event in def.events) {
-        const handlers = Array.isArray(def.events[event]) ? def.events[event] : [def.events[event]];
-        handlers.forEach(handler => {
-          if (typeof handler === 'function') {
-            el.addEventListener(event, handler);
-          } else {
-            el.addEventListener(event, handler.callback, handler.options);
-          }
+        handlers[event] = [];
+        const eventHandlers = Array.isArray(def.events[event]) ? def.events[event] : [def.events[event]];
+        eventHandlers.forEach(handler => {
+          const fn = typeof handler === 'function' ? handler : handler.callback;
+          const opts = typeof handler === 'function' ? undefined : handler.options;
+          el.addEventListener(event, fn, opts);
+          handlers[event].push(fn);
         });
       }
+      eventHandlerMap.set(el, handlers);
     }
     if (def.children) {
       def.children.forEach(childDef => {
@@ -225,21 +229,36 @@
     if (def.id && el.getAttribute('id') !== def.id) {
       el.setAttribute('id', def.id);
     }
+    const currentAttrs = Array.from(el.attributes).map(a => a.name);
+    for (const name of currentAttrs) {
+      if (name !== 'id' && !(name in def.attrs)) {
+        el.removeAttribute(name);
+      }
+    }
     for (const attr in def.attrs) {
       el.setAttribute(attr, def.attrs[attr]);
     }
     el.textContent = def.text || '';
+    if (eventHandlerMap.has(el)) {
+      const oldHandlers = eventHandlerMap.get(el);
+      for (const eventType in oldHandlers) {
+        oldHandlers[eventType].forEach(fn => el.removeEventListener(eventType, fn));
+      }
+      eventHandlerMap.delete(el);
+    }
     if (def.events) {
+      const handlers = {};
       for (const event in def.events) {
-        const handlers = Array.isArray(def.events[event]) ? def.events[event] : [def.events[event]];
-        handlers.forEach(handler => {
-          if (typeof handler === 'function') {
-            el.addEventListener(event, handler);
-          } else {
-            el.addEventListener(event, handler.callback, handler.options);
-          }
+        handlers[event] = [];
+        const eventHandlers = Array.isArray(def.events[event]) ? def.events[event] : [def.events[event]];
+        eventHandlers.forEach(handler => {
+          const fn = typeof handler === 'function' ? handler : handler.callback;
+          const opts = typeof handler === 'function' ? undefined : handler.options;
+          el.addEventListener(event, fn, opts);
+          handlers[event].push(fn);
         });
       }
+      eventHandlerMap.set(el, handlers);
     }
     const childEls = Array.from(el.children);
     const childDefs = def.children || [];
@@ -316,7 +335,7 @@
           return false;
         }
       }
-    } else if (def.type === 'text' && !def.text) {
+    } else if (def.type === 'text' && def.text == null) {
       console.error('Text element missing text content');
       return false;
     }
