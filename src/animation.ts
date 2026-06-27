@@ -33,7 +33,7 @@ export function easing(name: string): Record<string, string> {
     'ease-in': { calcMode: 'spline', keySplines: '0.42 0 1 1', keyTimes: '0;1' },
     'ease-out': { calcMode: 'spline', keySplines: '0 0 0.58 1', keyTimes: '0;1' },
     'ease-in-out': { calcMode: 'spline', keySplines: '0.42 0 0.58 1', keyTimes: '0;1' },
-    bounce: { calcMode: 'spline', keySplines: '0.5 1.5 0.5 -0.5', keyTimes: '0;1' },
+    bounce: { calcMode: 'spline', keySplines: '0.2 0 0.4 1; 0.4 0 0.6 0; 0.6 0 0.8 1; 0.8 0 1 0', keyTimes: '0;0.35;0.6;0.8;1' },
   };
   return map[name] || { calcMode: 'linear' };
 }

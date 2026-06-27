@@ -537,6 +537,24 @@ describe('enhanced animation helpers', () => {
     expect(easing('unknown')).toEqual({ calcMode: 'linear' });
   });
 
+  test('easing bounce uses valid keySplines (all values in 0-1 range)', () => {
+    const e = easing('bounce');
+    expect(e.calcMode).toBe('spline');
+    expect(e.keyTimes).toBeDefined();
+    // split keySplines into quads and verify all 4 values per quad are in [0,1]
+    const quads = e.keySplines!.split(';').map(q => q.trim().split(' ').map(Number));
+    for (const [x1, y1, x2, y2] of quads) {
+      expect(x1).toBeGreaterThanOrEqual(0);
+      expect(x1).toBeLessThanOrEqual(1);
+      expect(y1).toBeGreaterThanOrEqual(0);
+      expect(y1).toBeLessThanOrEqual(1);
+      expect(x2).toBeGreaterThanOrEqual(0);
+      expect(x2).toBeLessThanOrEqual(1);
+      expect(y2).toBeGreaterThanOrEqual(0);
+      expect(y2).toBeLessThanOrEqual(1);
+    }
+  });
+
   test('fadeIn wraps in g with opacity animate', () => {
     const def = fadeIn(circle(10, 10, 5, 'red'), '2s');
     expect(def.type).toBe('g');
