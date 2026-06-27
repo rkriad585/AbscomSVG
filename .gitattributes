@@ -1,0 +1,19 @@
+* text=auto eol=lf
+
+*.sh text eol=lf
+*.ps1 text eol=crlf
+
+*.ts text
+*.js text
+*.json text
+*.md text
+*.yml text
+*.yaml text
+*.html text
+*.css text
+
+*.png binary
+*.jpg binary
+*.ico binary
+
+dist/ linguist-generated=true
