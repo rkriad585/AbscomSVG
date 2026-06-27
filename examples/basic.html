@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AbscomSVG — Basic Shapes</title>
+</head>
+<body>
+  <h2>Basic Shapes</h2>
+  <svg id="canvas" width="500" height="300" xmlns="http://www.w3.org/2000/svg"></svg>
+
+  <script src="https://unpkg.com/abscomsvg@2"></script>
+  <script>
+    AbscomSVG.render('canvas', [
+      AbscomSVG.circle(80, 80, 60, 'tomato'),
+      AbscomSVG.rect(180, 30, 120, 90, 'dodgerblue'),
+      AbscomSVG.ellipse(370, 80, 60, 40, 'gold'),
+      AbscomSVG.line(20, 220, 480, 220, '#555'),
+      AbscomSVG.polygon('250,250 300,180 350,250', 'seagreen'),
+      AbscomSVG.path('M400 250 Q430 200 460 250', 'none', { 'stroke': '#c0c', 'stroke-width': 4 }),
+      AbscomSVG.text(20, 280, 'Hello AbscomSVG', { fill: '#333', 'font-size': '18px' }),
+    ]);
+  </script>
+</body>
+</html>

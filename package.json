@@ -1,0 +1,48 @@
+{
+  "name": "abscomsvg",
+  "version": "2.0.0",
+  "description": "Lightweight JavaScript framework for dynamic SVG generation and manipulation",
+  "type": "module",
+  "main": "./dist/abscomsvg.cjs",
+  "module": "./dist/abscomsvg.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/abscomsvg.mjs",
+      "require": "./dist/abscomsvg.cjs"
+    }
+  },
+  "unpkg": "./dist/abscomsvg.iife.js",
+  "jsdelivr": "./dist/abscomsvg.iife.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm run typecheck"
+  },
+  "devDependencies": {
+    "tsup": "^8.4.0",
+    "typescript": "^5.7.0"
+  },
+  "keywords": [
+    "svg",
+    "graphics",
+    "animation",
+    "dom",
+    "declarative"
+  ],
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rkriad585/AbscomSVG.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rkriad585/AbscomSVG/issues"
+  },
+  "homepage": "https://github.com/rkriad585/AbscomSVG#readme"
+}

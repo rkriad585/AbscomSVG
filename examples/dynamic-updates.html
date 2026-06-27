@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AbscomSVG — Dynamic Updates</title>
+</head>
+<body>
+  <h2>Dynamic Re-rendering with ID-based Diffing</h2>
+  <svg id="canvas" width="500" height="250" xmlns="http://www.w3.org/2000/svg"></svg>
+  <p>
+    <button id="moveBtn">Move green circle</button>
+    <button id="resetBtn">Reset</button>
+  </p>
+
+  <script src="https://unpkg.com/abscomsvg@2"></script>
+  <script>
+    let cx = 80;
+
+    function renderScene() {
+      AbscomSVG.render('canvas', [
+        // Static red square — no id, appended only once on first render
+        AbscomSVG.rect(20, 20, 60, 60, 'tomato'),
+
+        // Green circle with id — updates in-place on every render
+        { ...AbscomSVG.circle(cx, 150, 40, 'seagreen'), id: 'movingCircle' },
+
+        // Static label
+        AbscomSVG.text(20, 230, 'Click "Move" to update the circle position', { fill: '#666', 'font-size': '14px' }),
+      ]);
+    }
+
+    renderScene();
+
+    document.getElementById('moveBtn').addEventListener('click', () => {
+      cx += 30;
+      if (cx > 460) cx = 80;
+      renderScene();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      cx = 80;
+      renderScene();
+    });
+  </script>
+</body>
+</html>

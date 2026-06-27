@@ -2,39 +2,72 @@
 
 ## Overview
 
-Single-file browser-only SVG framework. No build step, no package manager, no tests.
+TypeScript SVG framework packaged as a dual-format (ESM/CJS) npm module with a browser IIFE for CDN.
 
-- **Entrypoint**: `abscomsvg.js` — IIFE that exposes `window.AbscomSVG` globally.
-- **No npm / Node** — include via `<script src="abscomsvg.js">` in HTML.
-- **No test runner** — manual verification in browser only (open an HTML page in a browser).
+- **Runtime support**: Browser, Node.js ≥18, Bun
+- **Build**: `tsup` — outputs ESM (`.mjs`), CJS (`.cjs`), and IIFE (`.iife.js` for CDN)
+- **TypeScript**: declarations auto-generated in `dist/`
+- **No runtime dependencies**
+
+## Project Structure
+
+```
+src/
+  index.ts      — Public API exports
+  types.ts      — SvgDef, EventHandler interfaces
+  elements.ts   — Creation helpers + withStroke/transform
+  renderer.ts   — DOM render, createElement, updateElement, validate (internal)
+  browser.ts    — IIFE entry for CDN (re-exports index)
+tests/
+  basic.test.ts — Smoke tests for element creation helpers
+```
+
+## Commands
+
+| Command | Action |
+|---|---|
+| `bun test` | Run tests (creation helpers; render needs a browser) |
+| `npm run build` | `tsup` → `dist/abscomsvg.{cjs,mjs,iife.js}` + `.d.ts` |
+| `npm run dev` | Watch mode rebuild |
+| `npm run typecheck` | `tsc --noEmit` |
 
 ## Definition Object Pattern
 
-All public helpers return **definition objects** (not DOM elements):
+All element helpers return **definition objects** (plain data, no DOM):
 ```
 { type: string, attrs: object, id?: string, text?: string, events?: object, children?: object[] }
 ```
 
-`AbscomSVG.render(targetIdOrEl, def | def[])` reconciles definitions onto real SVG DOM.
+These work in any runtime. `render()` reconciles them against real SVG DOM and requires a browser.
 
 ## DOM-diffing on Re-render
 
-- Elements with an **`id`** are **updated in-place** on subsequent renders (attrs/text replaced, old children removed, new ones appended).
+- Elements with an **`id`** are **updated in-place** on subsequent renders (stale attributes removed, old event listeners cleaned up, new ones applied).
 - Elements **without `id`** are always appended as new nodes.
 - Stale IDs (present in DOM but absent in latest `render()` call) are **removed**.
 
 ## API Quirks
 
 - `image(href, x, y, width, height)` sets `xlink:href` (not `href`).
-- `transform(type, ...values)` returns a **string** (`"rotate(45,50,50)"`) — caller must assign it to `def.attrs.transform`.
+- `transform(type, ...values)` returns a **string** — caller must assign it to `def.attrs.transform`.
 - `withStroke(def, color, width)` mutates and returns `def`.
 - Event handlers: `def.events.click = [fn | {callback, options}]` — array or single value.
 - Validation warnings for missing required attrs go to `console.error` but do not throw.
 
-## Available Helpers
+## Browser / Node split
 
-`circle`, `rect`, `ellipse`, `line`, `polygon`, `path`, `text`, `image`, `animate`, `withStroke`, `transform`.
+| Function | Node/Bun | Browser |
+|---|---|---|
+| `circle`, `rect`, ... creation helpers | ✅ | ✅ |
+| `withStroke`, `transform` | ✅ | ✅ |
+| `render()` | ❌ (throws) | ✅ |
 
-## SVG Namespace
+For server-side SVG generation, use helpers to build definitions and serialize manually.
 
-Hardcoded to `http://www.w3.org/2000/svg`. The target `<svg>` container needs `xmlns="http://www.w3.org/2000/svg"`.
+## Build Artifacts
+
+After build, `dist/` contains:
+- `abscomsvg.mjs` — ESM (`import { circle } from 'abscomsvg'`)
+- `abscomsvg.cjs` — CommonJS (`const { circle } = require('abscomsvg')`)
+- `abscomsvg.iife.js` — Browser global (`<script src="...">`, exposes `window.AbscomSVG`)
+- `index.d.ts`, `index.d.ts.map` — TypeScript declarations

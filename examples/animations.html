@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AbscomSVG — Animations</title>
+</head>
+<body>
+  <h2>Animated SVG</h2>
+  <svg id="canvas" width="500" height="300" xmlns="http://www.w3.org/2000/svg"></svg>
+
+  <script src="https://unpkg.com/abscomsvg@2"></script>
+  <script>
+    // Animated circle: pulsing radius
+    const pulsingCircle = {
+      ...AbscomSVG.circle(100, 100, 30, 'mediumpurple'),
+      children: [
+        AbscomSVG.animate('r', '30', '60', '1.5s', 'indefinite'),
+      ],
+    };
+
+    // Animated rectangle: moving vertically
+    const movingRect = {
+      ...AbscomSVG.rect(300, 50, 80, 50, 'coral'),
+      children: [
+        AbscomSVG.animate('y', '50', '200', '2s', 'indefinite'),
+      ],
+    };
+
+    AbscomSVG.render('canvas', [pulsingCircle, movingRect]);
+  </script>
+</body>
+</html>

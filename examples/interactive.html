@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AbscomSVG — Interactive</title>
+</head>
+<body>
+  <h2>Interactive SVG (click and hover)</h2>
+  <svg id="canvas" width="500" height="300" xmlns="http://www.w3.org/2000/svg"></svg>
+  <p id="status" style="font-family: monospace;">Click a shape →</p>
+
+  <script src="https://unpkg.com/abscomsvg@2"></script>
+  <script>
+    const status = document.getElementById('status');
+
+    const clickableCircle = {
+      ...AbscomSVG.circle(100, 130, 70, 'steelblue'),
+      id: 'blueCircle',
+      events: {
+        click: [() => status.textContent = 'Clicked blue circle!'],
+        mouseenter: [() => status.textContent = 'Hovering blue circle'],
+      },
+    };
+
+    const clickableRect = {
+      ...AbscomSVG.rect(280, 70, 140, 100, 'crimson'),
+      id: 'redRect',
+      events: {
+        click: [
+          { callback: () => status.textContent = 'Clicked red rectangle!', options: { once: true } },
+        ],
+        mouseenter: [() => status.textContent = 'Hovering red rectangle'],
+      },
+    };
+
+    AbscomSVG.render('canvas', [clickableCircle, clickableRect]);
+  </script>
+</body>
+</html>
