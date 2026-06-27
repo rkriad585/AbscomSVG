@@ -87,4 +87,4 @@ dist/         — Build output (ESM, CJS, IIFE + .d.ts)
 
 ## License
 
-MIT © 2026 rkriad585
+MIT © 2025 rkriad585
