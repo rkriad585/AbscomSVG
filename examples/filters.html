@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AbscomSVG — SVG Filters</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 900px;
+      margin: 2rem auto;
+      background: #f8f9fa;
+      padding: 0 1rem;
+      color: #333;
+    }
+    .demo {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .demo h2 {
+      margin-top: 0;
+      font-size: 1.1rem;
+      color: #444;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 0.5rem;
+    }
+    .demo p { font-size: 0.9rem; color: #666; margin: 0.5rem 0 1rem; }
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+    }
+    .card {
+      text-align: center;
+    }
+    .card svg {
+      display: block;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    .card label {
+      display: block;
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 0.3rem;
+    }
+    code {
+      background: #eef;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="demo">
+  <h2>Drop Shadow</h2>
+  <p><code>dropShadow(id, dx, dy, stdDev, color)</code></p>
+  <div class="grid">
+    <div class="card">
+      <svg id="demo-no-shadow" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>No shadow</label>
+    </div>
+    <div class="card">
+      <svg id="demo-shadow-basic" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Basic shadow</label>
+    </div>
+    <div class="card">
+      <svg id="demo-shadow-colored" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Colored shadow</label>
+    </div>
+    <div class="card">
+      <svg id="demo-glow" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Glow effect</label>
+    </div>
+  </div>
+</div>
+
+<div class="demo">
+  <h2>Blur &amp; Color Effects</h2>
+  <p><code>blur(id, stdDev)</code> &amp; color matrix filters.</p>
+  <div class="grid">
+    <div class="card">
+      <svg id="demo-original" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Original</label>
+    </div>
+    <div class="card">
+      <svg id="demo-blur" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Blur (3)</label>
+    </div>
+    <div class="card">
+      <svg id="demo-grayscale" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Grayscale</label>
+    </div>
+    <div class="card">
+      <svg id="demo-sepia" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Sepia</label>
+    </div>
+    <div class="card">
+      <svg id="demo-hue" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Hue rotate 90°</label>
+    </div>
+    <div class="card">
+      <svg id="demo-invert" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Invert</label>
+    </div>
+  </div>
+</div>
+
+<div class="demo">
+  <h2>Brightness &amp; Contrast</h2>
+  <p><code>brightness(id, amount)</code> &amp; <code>contrast(id, amount)</code></p>
+  <div class="grid">
+    <div class="card">
+      <svg id="demo-bright" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Brightness 1.8</label>
+    </div>
+    <div class="card">
+      <svg id="demo-dark" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Brightness 0.5</label>
+    </div>
+    <div class="card">
+      <svg id="demo-high-contrast" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>High contrast</label>
+    </div>
+    <div class="card">
+      <svg id="demo-low-opacity" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Opacity 0.4</label>
+    </div>
+  </div>
+</div>
+
+<div class="demo">
+  <h2>Advanced: Turbulence + Displacement</h2>
+  <p>Procedural noise and distortion effects.</p>
+  <div class="grid">
+    <div class="card">
+      <svg id="demo-turbulence" width="140" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Turbulence (noise)</label>
+    </div>
+    <div class="card">
+      <svg id="demo-displace" width="140" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Displacement map</label>
+    </div>
+  </div>
+</div>
+
+<div class="demo">
+  <h2>Comparison: FilterBuilder vs Shorthand</h2>
+  <p>Both approaches produce identical results.</p>
+  <div class="grid">
+    <div class="card">
+      <svg id="demo-shorthand" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Shorthand <code>dropShadow()</code></label>
+    </div>
+    <div class="card">
+      <svg id="demo-builder" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+      <label>Builder <code>new FilterBuilder()</code></label>
+    </div>
+  </div>
+</div>
+
+<script src="/dist/abscomsvg.iife.js"></script>
+<script>
+  const { render, defs, rect, circle, text, FilterBuilder, dropShadow, blur, glow, grayscale, sepia, brightness, contrast, hueRotate } = AbscomSVG;
+
+  // ============================================================
+  // 1. Drop Shadow — comparing no shadow, basic, colored, glow
+  // ============================================================
+  render('#demo-no-shadow', rect(10, 10, 80, 80, 'tomato'));
+
+  const shadowFilters = defs([
+    dropShadow('shadow-basic', 3, 3, 4, '#00000060'),
+    dropShadow('shadow-red', 3, 3, 6, '#e74c3c'),
+    glow('glow-cyan', '#00ffff', 5),
+  ]);
+  render('#demo-shadow-basic', [shadowFilters, rect(10, 10, 80, 80, 'tomato', { filter: 'url(#shadow-basic)' })]);
+  render('#demo-shadow-colored', [shadowFilters, rect(10, 10, 80, 80, 'tomato', { filter: 'url(#shadow-red)' })]);
+  render('#demo-glow', [shadowFilters, rect(10, 10, 80, 80, 'tomato', { filter: 'url(#glow-cyan)' })]);
+
+  // ============================================================
+  // 2. Blur & Color Effects
+  // ============================================================
+  const colorFilters = defs([
+    blur('myBlur', 3),
+    grayscale('gray'),
+    sepia('sepia'),
+    hueRotate('hue90', 90),
+    new FilterBuilder('invert').invert(1).build(),
+  ]);
+  render('#demo-original', rect(10, 10, 80, 80, '#2ecc71'));
+  render('#demo-blur', [colorFilters, rect(10, 10, 80, 80, '#2ecc71', { filter: 'url(#myBlur)' })]);
+  render('#demo-grayscale', [colorFilters, rect(10, 10, 80, 80, '#2ecc71', { filter: 'url(#gray)' })]);
+  render('#demo-sepia', [colorFilters, rect(10, 10, 80, 80, '#2ecc71', { filter: 'url(#sepia)' })]);
+  render('#demo-hue', [colorFilters, rect(10, 10, 80, 80, '#2ecc71', { filter: 'url(#hue90)' })]);
+  render('#demo-invert', [colorFilters, rect(10, 10, 80, 80, '#2ecc71', { filter: 'url(#invert)' })]);
+
+  // ============================================================
+  // 3. Brightness & Contrast
+  // ============================================================
+  const toneFilters = defs([
+    brightness('bright', 1.8),
+    brightness('dark', 0.5),
+    contrast('high-contrast', 2.5),
+    new FilterBuilder('low-opacity').opacity(0.4).build(),
+  ]);
+  render('#demo-bright', [toneFilters, rect(10, 10, 80, 80, '#3498db', { filter: 'url(#bright)' })]);
+  render('#demo-dark', [toneFilters, rect(10, 10, 80, 80, '#3498db', { filter: 'url(#dark)' })]);
+  render('#demo-high-contrast', [toneFilters, rect(10, 10, 80, 80, '#bdc3c7', { filter: 'url(#high-contrast)' })]);
+  render('#demo-low-opacity', [toneFilters, rect(10, 10, 80, 80, '#e74c3c', { filter: 'url(#low-opacity)' })]);
+
+  // ============================================================
+  // 4. Turbulence + Displacement
+  // ============================================================
+  const distortFilters = defs([
+    new FilterBuilder('noise')
+      .turbulence('0.04', 3)
+      .build(),
+    new FilterBuilder('ripple')
+      .turbulence('0.02', 2, 'turbulence', 'turb')
+      .displacementMap(20, 'SourceGraphic', 'turb')
+      .build(),
+  ]);
+  render('#demo-turbulence', [distortFilters, rect(10, 10, 120, 80, 'transparent', { filter: 'url(#noise)', stroke: '#333' })]);
+  render('#demo-displace', [distortFilters, text(20, 55, 'Warped!', { fontSize: '24px', fill: '#333', filter: 'url(#ripple)' })]);
+
+  // ============================================================
+  // 5. Comparison: Shorthand vs FilterBuilder
+  // ============================================================
+  const compareFilters = defs([
+    dropShadow('short-shadow', 3, 3, 5, '#e74c3c'),
+    new FilterBuilder('builder-shadow')
+      .dropShadow(3, 3, 5, '#e74c3c')
+      .build(),
+  ]);
+  render('#demo-shorthand', [compareFilters, circle(50, 50, 35, '#2ecc71', { filter: 'url(#short-shadow)' })]);
+  render('#demo-builder', [compareFilters, circle(50, 50, 35, '#2ecc71', { filter: 'url(#builder-shadow)' })]);
+</script>
+</body>
+</html>

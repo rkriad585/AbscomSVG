@@ -93,6 +93,15 @@ import {
   type Rgb,
   type Rgba,
   type Hsl,
+  FilterBuilder,
+  dropShadow,
+  blur,
+  glow,
+  grayscale,
+  sepia,
+  brightness,
+  contrast,
+  hueRotate,
 } from '../src/index';
 
 describe('element creation helpers', () => {
@@ -945,6 +954,163 @@ describe('color helpers', () => {
     expect(names).toContain('pastel');
     expect(names).toContain('vibrant');
     expect(names.length).toBe(10);
+  });
+});
+
+describe('filter helpers', () => {
+  test('FilterBuilder blur', () => {
+    const def = new FilterBuilder('b1').blur(4).build();
+    expect(def.type).toBe('filter');
+    expect(def.attrs.id).toBe('b1');
+    expect(def.children).toHaveLength(1);
+    expect(def.children![0].type).toBe('feGaussianBlur');
+    expect(def.children![0].attrs.stdDeviation).toBe(4);
+    expect(def.children![0].attrs['in']).toBe('SourceGraphic');
+  });
+
+  test('FilterBuilder dropShadow', () => {
+    const def = new FilterBuilder('s1').dropShadow(2, 2, 4, '#000').build();
+    expect(def.children![0].type).toBe('feDropShadow');
+    expect(def.children![0].attrs.dx).toBe(2);
+    expect(def.children![0].attrs.dy).toBe(2);
+    expect(def.children![0].attrs['flood-color']).toBe('#000');
+  });
+
+  test('FilterBuilder chaining multiple primitives', () => {
+    const def = new FilterBuilder('chain')
+      .blur(2)
+      .offset(5, 5)
+      .build();
+    expect(def.children).toHaveLength(2);
+    expect(def.children![0].type).toBe('feGaussianBlur');
+    expect(def.children![1].type).toBe('feOffset');
+  });
+
+  test('FilterBuilder grayscale', () => {
+    const def = new FilterBuilder('g').grayscale().build();
+    expect(def.children![0].type).toBe('feColorMatrix');
+    expect(def.children![0].attrs.type).toBe('saturate');
+    expect(def.children![0].attrs.values).toBe('1');
+  });
+
+  test('FilterBuilder sepia', () => {
+    const def = new FilterBuilder('s').sepia().build();
+    expect(def.children![0].type).toBe('feColorMatrix');
+    expect(def.children![0].attrs.type).toBe('matrix');
+  });
+
+  test('FilterBuilder hueRotate', () => {
+    const def = new FilterBuilder('h').hueRotate(90).build();
+    expect(def.children![0].attrs.values).toBe('90');
+  });
+
+  test('FilterBuilder brightness', () => {
+    const def = new FilterBuilder('b').brightness(2).build();
+    expect(def.children![0].type).toBe('feComponentTransfer');
+    expect(def.children![0].children).toHaveLength(3);
+  });
+
+  test('FilterBuilder contrast', () => {
+    const def = new FilterBuilder('c').contrast(1.5).build();
+    expect(def.children![0].type).toBe('feComponentTransfer');
+  });
+
+  test('FilterBuilder invert', () => {
+    const def = new FilterBuilder('i').invert().build();
+    expect(def.children![0].children).toHaveLength(3);
+    expect(def.children![0].children![0].attrs.type).toBe('table');
+  });
+
+  test('FilterBuilder opacity', () => {
+    const def = new FilterBuilder('o').opacity(0.5).build();
+    expect(def.children![0].children).toHaveLength(1);
+    expect(def.children![0].children![0].type).toBe('feFuncA');
+  });
+
+  test('FilterBuilder blend', () => {
+    const def = new FilterBuilder('bl').blend('a', 'b', 'multiply').build();
+    expect(def.children![0].type).toBe('feBlend');
+    expect(def.children![0].attrs.mode).toBe('multiply');
+  });
+
+  test('FilterBuilder merge', () => {
+    const def = new FilterBuilder('m').merge('a', 'b', 'c').build();
+    expect(def.children![0].type).toBe('feMerge');
+    expect(def.children![0].children).toHaveLength(3);
+    expect(def.children![0].children![0].attrs['in']).toBe('a');
+  });
+
+  test('FilterBuilder turbulence', () => {
+    const def = new FilterBuilder('t').turbulence('0.02', 3).build();
+    expect(def.children![0].type).toBe('feTurbulence');
+    expect(def.children![0].attrs.baseFrequency).toBe('0.02');
+    expect(def.children![0].attrs.numOctaves).toBe(3);
+  });
+
+  test('FilterBuilder displacementMap', () => {
+    const def = new FilterBuilder('d').displacementMap(15).build();
+    expect(def.children![0].type).toBe('feDisplacementMap');
+    expect(def.children![0].attrs.scale).toBe(15);
+  });
+
+  test('FilterBuilder flood', () => {
+    const def = new FilterBuilder('f').flood('red', 0.5).build();
+    expect(def.children![0].type).toBe('feFlood');
+    expect(def.children![0].attrs['flood-color']).toBe('red');
+    expect(def.children![0].attrs['flood-opacity']).toBe(0.5);
+  });
+
+  test('FilterBuilder custom attrs in constructor', () => {
+    const def = new FilterBuilder('b', { x: '-10%', y: '-10%', width: '120%', height: '120%' })
+      .blur(4)
+      .build();
+    expect(def.attrs.x).toBe('-10%');
+    expect(def.attrs.width).toBe('120%');
+  });
+
+  // --- Shorthand functions ---
+
+  test('dropShadow shorthand', () => {
+    const def = dropShadow('s', 3, 3, 5, '#00000080');
+    expect(def.type).toBe('filter');
+    expect(def.attrs.id).toBe('s');
+    expect(def.children![0].attrs.dx).toBe(3);
+  });
+
+  test('blur shorthand', () => {
+    const def = blur('b', 6);
+    expect(def.children![0].attrs.stdDeviation).toBe(6);
+  });
+
+  test('glow shorthand', () => {
+    const def = glow('g', '#ff00ff', 6);
+    expect(def.children![0].attrs['flood-color']).toBe('#ff00ff');
+    expect(def.children![0].attrs.stdDeviation).toBe(6);
+  });
+
+  test('grayscale shorthand', () => {
+    const def = grayscale('g');
+    expect(def.children![0].attrs.values).toBe('1');
+  });
+
+  test('sepia shorthand', () => {
+    const def = sepia('s', 0.5);
+    expect(def.children![0].attrs.type).toBe('matrix');
+  });
+
+  test('brightness shorthand', () => {
+    const def = brightness('b', 2);
+    expect(def.children![0].type).toBe('feComponentTransfer');
+  });
+
+  test('contrast shorthand', () => {
+    const def = contrast('c', 1.5);
+    expect(def.children![0].type).toBe('feComponentTransfer');
+  });
+
+  test('hueRotate shorthand', () => {
+    const def = hueRotate('h', 90);
+    expect(def.children![0].attrs.values).toBe('90');
   });
 });
 

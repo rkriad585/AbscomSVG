@@ -969,6 +969,175 @@ listPalettes()  // → ['material', 'pastel', 'vibrant', ...]
 
 ---
 
+## Filter Helpers
+
+SVG filter effects let you apply image-processing operations (blur, shadow, color shifts, etc.) to elements. These helpers build `<filter>` definitions that work inside `<defs>`.
+
+### FilterBuilder
+
+```ts
+new FilterBuilder(id: string, attrs?: Record<string, unknown>)
+```
+
+Fluent builder that creates a `<filter>` element with child primitives.
+
+**Methods:**
+
+| Method | SVG Element | Description |
+|---|---|---|
+| `.blur(stdDev, in?, result?)` | `feGaussianBlur` | Gaussian blur |
+| `.dropShadow(dx, dy, stdDev, color?, result?)` | `feDropShadow` | Drop shadow |
+| `.offset(dx, dy, in?, result?)` | `feOffset` | Offset the input |
+| `.colorMatrix(type, values, in?, result?)` | `feColorMatrix` | Color transformation |
+| `.grayscale(amount?, result?)` | `feColorMatrix` | Convert to grayscale (`amount`: 0=gray, 1=color) |
+| `.sepia(amount?, result?)` | `feColorMatrix` | Sepia tone (0–1) |
+| `.hueRotate(angle?, result?)` | `feColorMatrix` | Hue rotation (degrees) |
+| `.saturate(amount?, result?)` | `feColorMatrix` | Adjust saturation |
+| `.brightness(amount?, result?)` | `feComponentTransfer` | Brightness multiplier |
+| `.contrast(amount?, result?)` | `feComponentTransfer` | Contrast adjustment |
+| `.invert(amount?, result?)` | `feComponentTransfer` | Invert colors (0–1) |
+| `.opacity(amount?, result?)` | `feComponentTransfer` | Opacity multiplier |
+| `.blend(in1, in2, mode?, result?)` | `feBlend` | Blend two inputs |
+| `.composite(operator, in1, in2?, result?)` | `feComposite` | Composite with operator |
+| `.merge(...inputs)` | `feMerge` | Merge multiple inputs |
+| `.turbulence(baseFreq?, numOctaves?, type?, result?)` | `feTurbulence` | Noise generation |
+| `.displacementMap(scale?, in1?, in2?, xChan?, yChan?, result?)` | `feDisplacementMap` | Distort using a map |
+| `.flood(color, opacity?, result?)` | `feFlood` | Fill with color |
+| `.build()` | — | Returns final `SvgDef` |
+
+```js
+// Blur filter
+new FilterBuilder('myBlur').blur(4).build()
+
+// Drop shadow
+new FilterBuilder('shadow')
+  .dropShadow(2, 2, 4, 'rgba(0,0,0,0.5)')
+  .build()
+
+// Multiple effects chained
+new FilterBuilder('effects')
+  .blur(2)
+  .brightness(1.2)
+  .build()
+
+// Custom filter bounds
+new FilterBuilder('wide', { x: '-20%', y: '-20%', width: '140%', height: '140%' })
+  .dropShadow(3, 3, 5, '#000')
+  .build()
+```
+
+### Shorthand Filter Functions
+
+Each shorthand creates a complete filter definition in one call.
+
+#### dropShadow
+
+```ts
+dropShadow(id: string, dx: number, dy: number, stdDev: number, color?: string): SvgDef
+```
+
+```js
+dropShadow('s', 2, 2, 4, '#00000080')
+```
+
+#### blur
+
+```ts
+blur(id: string, stdDev: number): SvgDef
+```
+
+```js
+blur('b', 4)
+```
+
+#### glow
+
+```ts
+glow(id: string, color?: string, stdDev?: number): SvgDef
+```
+
+A colored drop shadow with no offset. Default: cyan glow.
+
+```js
+glow('g', '#ff00ff', 6)
+```
+
+#### grayscale
+
+```ts
+grayscale(id: string, amount?: number): SvgDef
+```
+
+`amount` = 0 for full grayscale, 1 for original color. Default: 0.
+
+```js
+grayscale('g')     // full grayscale
+grayscale('g', 0.5) // 50% desaturated
+```
+
+#### sepia
+
+```ts
+sepia(id: string, amount?: number): SvgDef
+```
+
+```js
+sepia('s', 0.5)  // half sepia
+```
+
+#### brightness
+
+```ts
+brightness(id: string, amount?: number): SvgDef
+```
+
+Multiplier: >1 brightens, <1 darkens. Default: 1.5.
+
+```js
+brightness('b', 2)
+```
+
+#### contrast
+
+```ts
+contrast(id: string, amount?: number): SvgDef
+```
+
+```js
+contrast('c', 1.5)
+```
+
+#### hueRotate
+
+```ts
+hueRotate(id: string, angle?: number): SvgDef
+```
+
+```js
+hueRotate('h', 90)
+```
+
+**Usage pattern:**
+
+```js
+import { defs, rect, render } from 'abscomsvg';
+
+// 1. Define filters
+const myFilters = defs([
+  dropShadow('shadow', 2, 2, 4, '#00000080'),
+  blur('blur', 4),
+  glow('glow', '#00ffff'),
+]);
+
+// 2. Apply to elements via filter attr
+const box = rect(10, 10, 100, 100, 'red', { filter: 'url(#shadow)' });
+
+// 3. Render defs and element
+render('#svg', [myFilters, box]);
+```
+
+---
+
 ## PathBuilder
 
 Fluent builder for SVG path data strings.

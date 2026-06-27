@@ -90,6 +90,18 @@ export {
   listPalettes,
 } from './color';
 
+export {
+  FilterBuilder,
+  dropShadow,
+  blur,
+  glow,
+  grayscale,
+  sepia,
+  brightness,
+  contrast,
+  hueRotate,
+} from './filters';
+
 export { render } from './renderer';
 export type { RenderOptions } from './renderer';
 export type { SvgDef, EventHandler, GradientStop } from './types';
