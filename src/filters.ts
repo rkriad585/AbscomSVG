@@ -45,8 +45,8 @@ export class FilterBuilder {
     };
   }
 
-  /** @internal Add a child primitive with the given type and attrs. */
-  private add(type: string, attrs: Record<string, unknown>): this {
+  /** Add a child primitive with the given type and attrs. */
+  add(type: string, attrs: Record<string, unknown>): this {
     if (!this.def.children) this.def.children = [];
     this.def.children.push({ type, attrs });
     return this;
@@ -346,6 +346,41 @@ export class FilterBuilder {
   }
 
   /**
+   * Add a morphology effect (`<feMorphology>`) — dilates (thickens) or erodes
+   * (thins) the input graphic.
+   *
+   * @param operator - `'dilate'` or `'erode'`
+   * @param radius - Radius of the operation (number, or two numbers for x/y)
+   * @param in1 - Input name. Default: `'SourceGraphic'`.
+   * @param result - Optional output name
+   */
+  morphology(operator: string, radius: string | number, in1: string = 'SourceGraphic', result?: string): this {
+    return this.add('feMorphology', { operator, radius, in: in1, ...(result && { result }) });
+  }
+
+  /**
+   * Add a tile effect (`<feTile>`) — repeats the input image to fill the
+   * filter bounds.
+   *
+   * @param in1 - Input name. Default: `'SourceGraphic'`.
+   * @param result - Optional output name
+   */
+  tile(in1: string = 'SourceGraphic', result?: string): this {
+    return this.add('feTile', { in: in1, ...(result && { result }) });
+  }
+
+  /**
+   * Add an image input (`<feImage>`) — fetches an external image or SVG
+   * data URI for use as a filter input.
+   *
+   * @param href - Image URL or data URI
+   * @param result - Optional output name
+   */
+  feImage(href: string, result?: string): this {
+    return this.add('feImage', { href, ...(result && { result }) });
+  }
+
+  /**
    * Build and return the `<filter>` SvgDef.
    *
    * @returns A filter SvgDef suitable for use inside `<defs>`.
@@ -477,4 +512,49 @@ export function contrast(id: string, amount: number = 2): SvgDef {
  */
 export function hueRotate(id: string, angle: number = 180): SvgDef {
   return new FilterBuilder(id).hueRotate(angle).build();
+}
+
+/**
+ * Create a neon glow filter — intense colored glow with multiple layers.
+ *
+ * Uses two drop-shadow layers at different blur amounts for a realistic neon
+ * tube effect.
+ *
+ * @param id - Filter identifier
+ * @param color - Glow color (default `'#00ffff'`)
+ * @param stdDev - Maximum blur radius (default `6`)
+ * @returns A filter SvgDef
+ *
+ * @example
+ * defs([neon('n', '#ff00ff', 8)])
+ */
+export function neon(id: string, color: string = '#00ffff', stdDev: number = 6): SvgDef {
+  return new FilterBuilder(id)
+    .dropShadow(0, 0, stdDev * 1.5, color, 'outer')
+    .dropShadow(0, 0, stdDev * 0.5, color, 'inner')
+    .merge('outer', 'inner')
+    .build();
+}
+
+/**
+ * Create an outline / edge-detect filter.
+ *
+ * Uses `feMorphology` (erode) and `feComposite` (out) to create a thin outline
+ * around the input graphic.
+ *
+ * @param id - Filter identifier
+ * @param color - Outline color (default `'black'`)
+ * @param thickness - Outline thickness in pixels (default `1`)
+ * @returns A filter SvgDef
+ *
+ * @example
+ * defs([outline('o', 'red', 2)])
+ */
+export function outline(id: string, color: string = 'black', thickness: number = 1): SvgDef {
+  const fb = new FilterBuilder(id);
+  fb.add('feMorphology', { operator: 'dilate', radius: thickness, in: 'SourceAlpha', result: 'dilated' });
+  fb.add('feFlood', { 'flood-color': color, result: 'flood' });
+  fb.add('feComposite', { operator: 'in', in: 'flood', in2: 'dilated', result: 'outline' });
+  fb.add('feComposite', { operator: 'over', in: 'outline', in2: 'SourceGraphic' });
+  return fb.build();
 }

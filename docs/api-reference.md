@@ -310,6 +310,54 @@ An Archimedean spiral that grows from the center outward (drawn as a stroked pat
 spiral(50, 50, 4, 40, 'dodgerblue')
 ```
 
+### ring
+
+```ts
+ring(cx: number, cy: number, outerR: number, thickness?: number, fill?: string): SvgDef
+```
+
+Circle with thick stroke and transparent center. Thickness defaults to `outerR * 0.3`.
+
+```js
+ring(50, 50, 40, 8, 'red')
+```
+
+### capsule
+
+```ts
+capsule(x: number, y: number, w: number, h: number, fill?: string): SvgDef
+```
+
+Stadium shape (rect with `rx`/`ry` set to half the smaller dimension).
+
+```js
+capsule(10, 10, 100, 50, 'blue')
+```
+
+### tag
+
+```ts
+tag(x: number, y: number, w: number, h: number, fill?: string): SvgDef
+```
+
+Tag/label shape — rectangle with a pointed left side.
+
+```js
+tag(10, 10, 80, 40, 'green')
+```
+
+### chatBubble
+
+```ts
+chatBubble(cx: number, cy: number, w: number, h: number, fill?: string): SvgDef
+```
+
+Speech bubble with rounded corners and a bottom-left tail.
+
+```js
+chatBubble(50, 50, 100, 60, 'red')
+```
+
 ---
 
 ## Container Helpers
@@ -1250,6 +1298,9 @@ Fluent builder that creates a `<filter>` element with child primitives.
 | `.turbulence(baseFreq?, numOctaves?, type?, result?)` | `feTurbulence` | Noise generation |
 | `.displacementMap(scale?, in1?, in2?, xChan?, yChan?, result?)` | `feDisplacementMap` | Distort using a map |
 | `.flood(color, opacity?, result?)` | `feFlood` | Fill with color |
+| `.morphology(operator, radius, in?, result?)` | `feMorphology` | Dilate or erode the shape |
+| `.tile(in?, result?)` | `feTile` | Repeat input to fill bounds |
+| `.feImage(href, result?)` | `feImage` | External image as input |
 | `.build()` | — | Returns final `SvgDef` |
 
 ```js
@@ -1364,6 +1415,30 @@ hueRotate(id: string, angle?: number): SvgDef
 hueRotate('h', 90)
 ```
 
+#### neon
+
+```ts
+neon(id: string, color?: string, stdDev?: number): SvgDef
+```
+
+Intense multi-layer glow effect using two drop shadows at different blur levels.
+
+```js
+neon('n', '#ff00ff', 8)
+```
+
+#### outline
+
+```ts
+outline(id: string, color?: string, thickness?: number): SvgDef
+```
+
+Edge outline using `feMorphology` (dilate) and `feComposite`.
+
+```js
+outline('o', 'red', 2)
+```
+
 **Usage pattern:**
 
 ```js
@@ -1381,6 +1456,46 @@ const box = rect(10, 10, 100, 100, 'red', { filter: 'url(#shadow)' });
 
 // 3. Render defs and element
 render('#svg', [myFilters, box]);
+```
+
+---
+
+## Icon Symbols
+
+Pre-built icon symbol definitions (Feather-inspired). Each returns a `<symbol>` with `viewBox="0 0 24 24"`.
+
+Define them in `<defs>` and reference with `<use href="#id">`.
+
+| Function | Icon |
+|---|---|
+| `iconHome(id)` | House |
+| `iconClose(id)` | X / close |
+| `iconMenu(id)` | Hamburger menu |
+| `iconSearch(id)` | Magnifying glass |
+| `iconUser(id)` | Person |
+| `iconSettings(id)` | Gear |
+| `iconBell(id)` | Notification bell |
+| `iconArrowLeft(id)` | Left chevron arrow |
+| `iconArrowRight(id)` | Right chevron arrow |
+| `iconDownload(id)` | Download arrow |
+| `iconUpload(id)` | Upload arrow |
+| `iconHeart(id)` | Filled heart |
+| `iconStar(id)` | Filled star |
+| `iconInfo(id)` | Info circle |
+| `iconCheck(id)` | Checkmark circle |
+| `iconAlert(id)` | Warning triangle |
+| `iconExternalLink(id)` | External link |
+| `iconClock(id)` | Clock |
+
+```js
+const myDefs = defs([
+  iconHome('home'),
+  iconSearch('search'),
+  iconUser('user'),
+]);
+
+// Use anywhere:
+{ type: 'use', attrs: { href: '#home', x: 10, y: 10, width: 24, height: 24 } }
 ```
 
 ---

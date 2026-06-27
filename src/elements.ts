@@ -528,6 +528,92 @@ export function spiral(cx: number, cy: number, turns: number, maxR: number, fill
   };
 }
 
+/**
+ * Create a ring shape (donut with configurable border).
+ *
+ * Unlike `donut()`, the ring is drawn with a thick stroke, so `fill` controls
+ * the ring color and the center is transparent.
+ *
+ * @param cx - Center X
+ * @param cy - Center Y
+ * @param outerR - Outer radius
+ * @param thickness - Ring thickness (default: outerR * 0.3)
+ * @param fill - Fill/stroke color (default: `'currentColor'`)
+ * @returns A circle SvgDef with thick stroke
+ */
+export function ring(cx: number, cy: number, outerR: number, thickness?: number, fill?: string): SvgDef {
+  const t = thickness ?? outerR * 0.3;
+  return {
+    type: 'circle',
+    attrs: {
+      cx, cy, r: outerR - t / 2,
+      fill: 'none',
+      stroke: fill || 'currentColor',
+      'stroke-width': t,
+    },
+  };
+}
+
+/**
+ * Create a capsule shape (stadium — rectangle with semicircular ends).
+ *
+ * Useful for pills, badges, tags, and buttons.
+ *
+ * @param x - Left edge X
+ * @param y - Top edge Y
+ * @param w - Width
+ * @param h - Height (the smaller dimension becomes the end radius)
+ * @param fill - Fill color (default: `'currentColor'`)
+ * @returns A rect SvgDef with `rx`/`ry` set to half the smaller dimension
+ */
+export function capsule(x: number, y: number, w: number, h: number, fill?: string): SvgDef {
+  const r = Math.min(w, h) / 2;
+  return { type: 'rect', attrs: { x, y, width: w, height: h, rx: r, ry: r, fill: fill || 'currentColor' } };
+}
+
+/**
+ * Create a tag / label shape (rectangle with a pointed left side).
+ *
+ * Useful for price tags, labels, and badges.
+ *
+ * @param x - Left edge X (the triangle tip is at x)
+ * @param y - Top edge Y
+ * @param w - Width of the rectangular body
+ * @param h - Height
+ * @param fill - Fill color (default: `'currentColor'`)
+ * @returns A path SvgDef forming a tag
+ */
+export function tag(x: number, y: number, w: number, h: number, fill?: string): SvgDef {
+  const tipX = x;
+  const bodyX = x + h * 0.3;
+  const halfH = h / 2;
+  const d = `M ${bodyX} ${y} L ${bodyX + w} ${y} L ${bodyX + w} ${y + h} L ${bodyX} ${y + h} L ${tipX} ${y + halfH} Z`;
+  return { type: 'path', attrs: { d, fill: fill || 'currentColor' } };
+}
+
+/**
+ * Create a chat bubble / speech bubble shape.
+ *
+ * The bubble has a pointed tail at the bottom-left.
+ *
+ * @param cx - Center X
+ * @param cy - Center Y
+ * @param w - Width of the bubble body
+ * @param h - Height of the bubble body
+ * @param fill - Fill color (default: `'currentColor'`)
+ * @returns A path SvgDef forming a chat bubble
+ */
+export function chatBubble(cx: number, cy: number, w: number, h: number, fill?: string): SvgDef {
+  const x = cx - w / 2;
+  const y = cy - h / 2;
+  const r = Math.min(w, h) * 0.15;
+  const tailSize = h * 0.2;
+  const bx = x + w;
+  const by = y + h;
+  const d = `M ${x + r} ${y} L ${bx - r} ${y} A ${r} ${r} 0 0 1 ${bx} ${y + r} L ${bx} ${by - r} A ${r} ${r} 0 0 1 ${bx - r} ${by} L ${x + tailSize} ${by} L ${x} ${by + tailSize} L ${x} ${by - r} A ${r} ${r} 0 0 1 ${x + r} ${y} Z`;
+  return { type: 'path', attrs: { d, fill: fill || 'currentColor' } };
+}
+
 // ============================================================
 // Container Elements
 // ============================================================

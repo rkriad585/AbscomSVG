@@ -119,6 +119,30 @@ import {
   neutralTheme,
   toInlineSvg,
   toDataUri,
+  ring,
+  capsule,
+  tag,
+  chatBubble,
+  neon,
+  outline,
+  iconHome,
+  iconClose,
+  iconMenu,
+  iconSearch,
+  iconUser,
+  iconSettings,
+  iconBell,
+  iconArrowLeft,
+  iconArrowRight,
+  iconDownload,
+  iconUpload,
+  iconHeart,
+  iconStar,
+  iconInfo,
+  iconCheck,
+  iconAlert,
+  iconExternalLink,
+  iconClock,
 } from '../src/index';
 
 describe('element creation helpers', () => {
@@ -345,6 +369,40 @@ describe('built-in complex shapes', () => {
     expect(def.attrs['stroke-width']).toBe(2);
     expect(def.attrs.d).toContain('M');
     expect(def.attrs.d).toContain('L');
+  });
+
+  test('ring', () => {
+    const def = ring(50, 50, 40, 8, 'red');
+    expect(def.type).toBe('circle');
+    expect(def.attrs.fill).toBe('none');
+    expect(def.attrs.stroke).toBe('red');
+    expect(def.attrs['stroke-width']).toBe(8);
+  });
+
+  test('ring defaults thickness', () => {
+    const def = ring(50, 50, 40);
+    expect(def.attrs['stroke-width']).toBe(12);
+  });
+
+  test('capsule', () => {
+    const def = capsule(10, 10, 100, 50, 'blue');
+    expect(def.type).toBe('rect');
+    expect(def.attrs.rx).toBe(25);
+    expect(def.attrs.ry).toBe(25);
+  });
+
+  test('tag shape', () => {
+    const def = tag(10, 10, 80, 40, 'green');
+    expect(def.type).toBe('path');
+    expect(def.attrs.d).toContain('M');
+    expect(def.attrs.fill).toBe('green');
+  });
+
+  test('chatBubble', () => {
+    const def = chatBubble(50, 50, 100, 60, 'red');
+    expect(def.type).toBe('path');
+    expect(def.attrs.d).toContain('A');
+    expect(def.attrs.fill).toBe('red');
   });
 });
 
@@ -1258,6 +1316,40 @@ describe('filter helpers', () => {
     const def = hueRotate('h', 90);
     expect(def.children![0].attrs.values).toBe('90');
   });
+
+  test('FilterBuilder morphology', () => {
+    const def = new FilterBuilder('m').morphology('dilate', 3).build();
+    expect(def.children![0].type).toBe('feMorphology');
+    expect(def.children![0].attrs.operator).toBe('dilate');
+    expect(def.children![0].attrs.radius).toBe(3);
+  });
+
+  test('FilterBuilder tile', () => {
+    const def = new FilterBuilder('t').tile().build();
+    expect(def.children![0].type).toBe('feTile');
+  });
+
+  test('FilterBuilder feImage', () => {
+    const def = new FilterBuilder('i').feImage('data:...').build();
+    expect(def.children![0].type).toBe('feImage');
+    expect(def.children![0].attrs.href).toBe('data:...');
+  });
+
+  test('neon shorthand', () => {
+    const def = neon('n', '#ff00ff', 8);
+    expect(def.attrs.id).toBe('n');
+    expect(def.children!.length).toBeGreaterThanOrEqual(2);
+    expect(def.children![0].type).toBe('feDropShadow');
+  });
+
+  test('outline shorthand', () => {
+    const def = outline('o', 'red', 2);
+    expect(def.attrs.id).toBe('o');
+    const types = def.children!.map((c: any) => c.type);
+    expect(types).toContain('feMorphology');
+    expect(types).toContain('feFlood');
+    expect(types).toContain('feComposite');
+  });
 });
 
 describe('PathBuilder', () => {
@@ -1513,5 +1605,20 @@ describe('serialization', () => {
     const uri = toDataUri(svg);
     expect(uri).toMatch(/^data:image\/svg\+xml;charset=utf-8,/);
     expect(uri).toContain(encodeURIComponent(svg));
+  });
+});
+
+describe('icon symbols', () => {
+  const iconFns = [iconHome, iconClose, iconMenu, iconSearch, iconUser, iconSettings, iconBell, iconArrowLeft, iconArrowRight, iconDownload, iconUpload, iconHeart, iconStar, iconInfo, iconCheck, iconAlert, iconExternalLink, iconClock];
+
+  test('all icons return symbol defs with id and viewBox', () => {
+    for (const fn of iconFns) {
+      const def = fn('test');
+      expect(def.type).toBe('symbol');
+      expect(def.attrs.id).toBe('test');
+      expect(def.attrs.viewBox).toBe('0 0 24 24');
+      expect(def.children).toBeDefined();
+      expect(def.children!.length).toBeGreaterThan(0);
+    }
   });
 });

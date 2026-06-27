@@ -15,18 +15,27 @@ TypeScript SVG framework packaged as a dual-format (ESM/CJS) npm module with a b
 src/
   index.ts      — Public API exports
   types.ts      — SvgDef, EventHandler, GradientStop interfaces
-  elements.ts   — All creation helpers + utilities (shapes, containers, gradients, transforms, style, composition, attr)
+  elements.ts   — All creation helpers + utilities (shapes, containers, gradients, transforms, style, composition, attr, PathBuilder)
+  filters.ts    — FilterBuilder class (21 methods) + 10 shorthand helpers
+  color.ts      — 21 color functions + 10 palettes + color types
+  animation.ts  — 9 enhanced animation helpers (easing, fadeIn, pulse, etc.)
+  layout.ts     — 4 layout helpers (responsiveSvg, autoViewBox, grid, stack)
+  theme.ts      — Theme interface, applyTheme, neutralTheme
+  serialize.ts  — toInlineSvg, toDataUri, downloadSvg
+  symbols.ts    — 19 pre-built icon symbol functions
   renderer.ts   — DOM render with RenderOptions (hooks, validate toggle)
   browser.ts    — IIFE entry for CDN (re-exports index)
 tests/
-  basic.test.ts — 88 tests covering all helpers and utilities
+  basic.test.ts — 213 tests covering all helpers and utilities
 docs/
   overview.md, getting-started.md, guide.md, api-reference.md, architecture.md
 examples/
   basic.html, smiley-face.html, animations.html, interactive.html,
   dynamic-updates.html, gradients.html, transforms.html, composition.html,
   bar-chart.html, clip-mask-pattern.html, interactive-drawing.html,
-  node-server.js
+  shapes.html, color-playground.html, filters.html,
+  animations-enhanced.html, layout.html, theming.html,
+  filters-effects-shapes-symbols.html, node-server.js
 ```
 
 ## Commands
@@ -70,6 +79,10 @@ interface RenderOptions {
 
 - `image(href, x, y, width, height)` sets `xlink:href` (not `href`). Newer `use(href, x?, y?, width?, height?)` uses `href` (modern).
 - `transform(type, ...values)` returns a **string** — caller must assign it to `def.attrs.transform`. Also has named helpers: `translate`, `rotate`, `scale`, `skewX`, `skewY`, `composeTransforms`.
+- `FilterBuilder` has 21 methods including `morphology(operator, radius)`, `tile()`, `feImage(href)`.
+- Shorthand filter helpers: `blur`, `dropShadow`, `glow`, `shadow`, `neon`, `outline`, `hueRotate`, `grayscale`, `sepia`, `brightness`.
+- 4 additional shapes: `ring(cx, cy, outerR, thickness?)`, `capsule(x, y, w, h)`, `tag(x, y, w, h)`, `chatBubble(cx, cy, w, h)`.
+- 19 icon symbol functions: `iconHome`, `iconClose`, `iconMenu`, `iconSearch`, `iconUser`, `iconSettings`, `iconBell`, `iconArrowLeft`, `iconArrowRight`, `iconDownload`, `iconUpload`, `iconHeart`, `iconStar`, `iconInfo`, `iconCheck`, `iconAlert`, `iconExternalLink`, `iconClock`.
 - `withStroke(def, color, width)` mutates and returns `def`. Same pattern: `withClass`, `withStyle`, `withOpacity`, `setFill`, `attr` (setter mode), `removeAttr`.
 - `cloneDef(def, overrides?)` creates a deep clone (children recursively cloned).
 - `mergeDefs(...defs)` merges attrs/events/children, last-wins.

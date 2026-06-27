@@ -33,6 +33,10 @@ export {
   donut,
   gear,
   spiral,
+  ring,
+  capsule,
+  tag,
+  chatBubble,
   withStroke,
   withClass,
   withStyle,
@@ -112,6 +116,8 @@ export {
   brightness,
   contrast,
   hueRotate,
+  neon,
+  outline,
 } from './filters';
 
 export {
@@ -126,6 +132,27 @@ export { applyTheme, neutralTheme } from './theme';
 export type { Theme } from './theme';
 
 export { toInlineSvg, toDataUri, downloadSvg } from './serialize';
+
+export {
+  iconHome,
+  iconClose,
+  iconMenu,
+  iconSearch,
+  iconUser,
+  iconSettings,
+  iconBell,
+  iconArrowLeft,
+  iconArrowRight,
+  iconDownload,
+  iconUpload,
+  iconHeart,
+  iconStar,
+  iconInfo,
+  iconCheck,
+  iconAlert,
+  iconExternalLink,
+  iconClock,
+} from './symbols';
 
 export { render } from './renderer';
 export type { RenderOptions } from './renderer';

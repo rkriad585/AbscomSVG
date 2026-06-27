@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AbscomSVG — Filters, Effects, Shapes &amp; Symbols</title>
+  <style>
+    body { font-family: system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; background: #1a1a2e; color: #eee; gap: 24px; padding: 20px; }
+    h2 { margin: 0; }
+    h3 { margin: 0 0 4px; font-size: 0.9rem; color: #aaa; }
+    .row { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+    .card { display: flex; flex-direction: column; align-items: center; }
+    svg { border-radius: 8px; background: #16213e; }
+    .icon-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+    .icon-grid svg { width: 32px; height: 32px; color: #e94560; }
+  </style>
+</head>
+<body>
+  <h2>Filters, Effects, Shapes &amp; Symbols</h2>
+
+  <div class="row">
+    <div class="card">
+      <h3>Neon Glow</h3>
+      <svg id="neon-svg" width="120" height="120" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="card">
+      <h3>Outline Effect</h3>
+      <svg id="outline-svg" width="120" height="120" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="card">
+      <h3>Morphology (Dilate)</h3>
+      <svg id="morph-svg" width="120" height="120" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h3>Ring</h3>
+      <svg id="ring-svg" width="100" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="card">
+      <h3>Capsule</h3>
+      <svg id="capsule-svg" width="120" height="80" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="card">
+      <h3>Tag</h3>
+      <svg id="tag-svg" width="120" height="80" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="card">
+      <h3>Chat Bubble</h3>
+      <svg id="chat-svg" width="120" height="100" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Icons (via symbol + use)</h3>
+    <svg id="icons-svg" width="400" height="60" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <script src="/dist/abscomsvg.iife.js"></script>
+  <script>
+    const { circle, rect, ring, capsule, tag, chatBubble, defs, group, FilterBuilder, neon, outline, iconHome, iconSearch, iconUser, iconSettings, iconBell, iconHeart, iconStar, iconInfo, iconCheck, iconAlert, iconClock, render } = AbscomSVG;
+
+    // --- Neon filter ---
+    {
+      const filter = neon('neon-glow', '#ff00ff', 8);
+      const el = circle(60, 60, 30, '#fff');
+      el.attrs.filter = 'url(#neon-glow)';
+      render('neon-svg', [defs([filter]), el]);
+    }
+
+    // --- Outline filter ---
+    {
+      const filter = outline('outline-effect', '#00ff88', 2);
+      const el = circle(60, 60, 35, '#e94560');
+      el.attrs.filter = 'url(#outline-effect)';
+      render('outline-svg', [defs([filter]), el]);
+    }
+
+    // --- Morphology (dilate) filter ---
+    {
+      const filter = new FilterBuilder('morph')
+        .morphology('dilate', 3, 'SourceGraphic')
+        .build();
+      const el = rect(20, 20, 60, 60, '#533483');
+      el.attrs.filter = 'url(#morph)';
+      render('morph-svg', [defs([filter]), el]);
+    }
+
+    // --- Ring ---
+    {
+      render('ring-svg', ring(50, 50, 40, 10, '#e94560'));
+    }
+
+    // --- Capsule ---
+    {
+      render('capsule-svg', capsule(10, 15, 100, 50, '#0f3460'));
+    }
+
+    // --- Tag ---
+    {
+      render('tag-svg', tag(10, 15, 90, 45, '#533483'));
+    }
+
+    // --- Chat bubble ---
+    {
+      render('chat-svg', chatBubble(60, 50, 100, 70, '#1a5276'));
+    }
+
+    // --- Icons ---
+    {
+      const iconDefs = defs([
+        iconHome('home'), iconSearch('search'), iconUser('user'),
+        iconSettings('settings'), iconBell('bell'), iconHeart('heart'),
+        iconStar('star'), iconInfo('info'), iconCheck('check'),
+        iconAlert('alert'), iconClock('clock'),
+      ]);
+      const icons = [
+        { href: '#home', x: 10 }, { href: '#search', x: 44 }, { href: '#user', x: 78 },
+        { href: '#settings', x: 112 }, { href: '#bell', x: 146 }, { href: '#heart', x: 180 },
+        { href: '#star', x: 214 }, { href: '#info', x: 248 }, { href: '#check', x: 282 },
+        { href: '#alert', x: 316 }, { href: '#clock', x: 350 },
+      ].map(({ href, x }) => ({ type: 'use', attrs: { href, x, y: 18, width: 24, height: 24, color: '#e94560' } }));
+      render('icons-svg', [iconDefs, ...icons]);
+    }
+  </script>
+</body>
+</html>
