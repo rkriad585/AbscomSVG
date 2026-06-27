@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AbscomSVG — Bar Chart</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 700px;
+      margin: 2rem auto;
+      background: #f8f9fa;
+      padding: 0 1rem;
+    }
+    .chart-container {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    svg {
+      display: block;
+      margin: 0 auto;
+    }
+    .note {
+      color: #666;
+      font-size: 0.9rem;
+      text-align: center;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="chart-container">
+    <svg id="canvas" width="640" height="420" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+  <p class="note">
+    This chart is built entirely from data — change the numbers in the
+    <code>data</code> array and the chart updates automatically.
+  </p>
+
+  <script src="/dist/abscomsvg.iife.js"></script>
+  <script>
+    // ============================================================
+    // 1. Define the data
+    //    Each number represents a value. The chart will map each
+    //    value to a bar whose height is proportional to the number.
+    // ============================================================
+    const data = [12, 45, 28, 60, 35, 50];
+
+    // ============================================================
+    // 2. Chart dimensions and layout constants
+    //    These control how the chart looks. Tweak them to
+    //    experiment with spacing and sizing.
+    // ============================================================
+    const SVG_WIDTH  = 640;
+    const SVG_HEIGHT = 420;
+    const MARGIN     = { top: 60, bottom: 50, left: 60, right: 30 };
+    const CHART_TOP  = MARGIN.top;                              // y-coord where bars start
+    const CHART_BOTTOM = SVG_HEIGHT - MARGIN.bottom;            // y-coord of the baseline
+    const CHART_HEIGHT = CHART_BOTTOM - CHART_TOP;              // available height for bars
+
+    // ============================================================
+    // 3. Compute scales
+    //    - barWidth: how wide each bar is (total width / number of bars)
+    //    - gap: spacing between bars (10% of bar width)
+    //    - maxVal: the largest value in data (used to scale bar heights)
+    // ============================================================
+    const chartWidth = SVG_WIDTH - MARGIN.left - MARGIN.right;  // total horizontal space
+    const maxVal     = Math.max(...data);                        // tallest bar = 100% height
+    const barCount   = data.length;
+    const barWidth   = chartWidth / barCount;                   // each bar gets equal segment
+    const gap        = barWidth * 0.25;                          // 25% gap between bars
+
+    // ============================================================
+    // 4. Build the bar definitions using .map()
+    //    For each data value, we compute:
+    //      - barHeight: proportional to the value
+    //      - barX: x position (left edge) based on index
+    //      - barY: top edge of the bar (rising up from baseline)
+    // ============================================================
+    const bars = data.map((value, i) => {
+      const barHeight = (value / maxVal) * CHART_HEIGHT;        // scale value to pixels
+      const barX = MARGIN.left + i * barWidth + gap / 2;        // x with left margin + spacing
+      const barY = CHART_BOTTOM - barHeight;                     // rise upward from baseline
+
+      // Create a rect, then chain style helpers to color and shape it
+      return AbscomSVG.withStyle(
+        AbscomSVG.withClass(
+          AbscomSVG.rect(barX, barY, barWidth - gap, barHeight),
+          'bar',                                                 // CSS class for shared rules
+        ),
+        {
+          fill: `hsl(${i * 55}, 70%, 55%)`,                     // cycle through hues
+          rx: 4,                                                 // rounded top corners
+          ry: 4,
+        },
+      );
+    });
+
+    // ============================================================
+    // 5. Create labels (value text above each bar)
+    //    Same .map() pattern — one label per data point.
+    // ============================================================
+    const labels = data.map((value, i) => {
+      const barHeight = (value / maxVal) * CHART_HEIGHT;
+      const barX = MARGIN.left + i * barWidth + barWidth / 2;   // center of bar
+      const barY = CHART_BOTTOM - barHeight;
+
+      return AbscomSVG.text(barX, barY - 8, String(value), {
+        fill: '#333',
+        'font-size': '13px',
+        'text-anchor': 'middle',                                 // center text horizontally
+        'font-weight': 'bold',
+      });
+    });
+
+    // ============================================================
+    // 6. Create x-axis labels (below each bar)
+    //    These use a similar approach but sit below the baseline.
+    // ============================================================
+    const xLabels = data.map((_, i) => {
+      const barX = MARGIN.left + i * barWidth + barWidth / 2;
+      return AbscomSVG.text(barX, CHART_BOTTOM + 20, `Item ${i + 1}`, {
+        fill: '#555',
+        'font-size': '12px',
+        'text-anchor': 'middle',
+      });
+    });
+
+    // ============================================================
+    // 7. Title and axis elements
+    // ============================================================
+    const title = AbscomSVG.text(SVG_WIDTH / 2, 32, 'Monthly Revenue by Item', {
+      fill: '#222',
+      'font-size': '22px',
+      'text-anchor': 'middle',
+      'font-weight': 'bold',
+    });
+
+    // Baseline (x-axis line)
+    const axisLine = AbscomSVG.line(
+      MARGIN.left, CHART_BOTTOM,
+      SVG_WIDTH - MARGIN.right, CHART_BOTTOM,
+      '#444',
+    );
+
+    // y-axis label
+    const yLabel = AbscomSVG.text(18, SVG_HEIGHT / 2, 'Revenue', {
+      fill: '#555',
+      'font-size': '13px',
+      'text-anchor': 'middle',
+      transform: AbscomSVG.rotate(-90, 18, SVG_HEIGHT / 2),      // SVG transform string
+    });
+
+    // ============================================================
+    // 8. Render everything
+    //    Pass an array of all top-level elements. Elements without
+    //    an id are appended once; elements with an id get updated
+    //    in-place on re-render (not used here, but useful later).
+    // ============================================================
+    AbscomSVG.render('canvas', [
+      title,
+      axisLine,
+      ...bars,                                                   // spread the bar defs
+      ...labels,                                                 // spread the value labels
+      ...xLabels,                                                // spread the axis labels
+      yLabel,
+    ]);
+  </script>
+</body>
+</html>

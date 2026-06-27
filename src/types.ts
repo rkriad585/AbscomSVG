@@ -10,3 +10,9 @@ export interface SvgDef {
 export type EventHandler =
   | ((event: Event) => void)
   | { callback: (event: Event) => void; options?: AddEventListenerOptions };
+
+export interface GradientStop {
+  offset: string | number;
+  color: string;
+  opacity?: number;
+}

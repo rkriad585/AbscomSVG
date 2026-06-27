@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AbscomSVG — Gradients</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 20px; }
+    h2 { margin: 1em 0 0.5em; }
+    .row { display: flex; gap: 20px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <h2>Gradients</h2>
+  <div class="row">
+    <div>
+      <h3>Linear</h3>
+      <svg id="linear-demo" width="200" height="200" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div>
+      <h3>Radial</h3>
+      <svg id="radial-demo" width="200" height="200" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div>
+      <h3>Multi-stop</h3>
+      <svg id="multi-demo" width="200" height="200" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <h3>Angled</h3>
+      <svg id="angled-demo" width="200" height="200" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div>
+      <h3>Radial + Opacity</h3>
+      <svg id="opacity-demo" width="200" height="200" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div>
+      <h3>Animated</h3>
+      <svg id="animated-demo" width="200" height="200" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+
+  <script src="/dist/abscomsvg.iife.js"></script>
+  <script>
+    const {
+      svg, defs, linearGradient, radialGradient, stop,
+      rect, circle, ellipse, animate, group,
+    } = AbscomSVG;
+
+    // Linear: red → blue
+    AbscomSVG.render('linear-demo', [
+      defs([linearGradient('lg', 0, 0, 1, 0, [
+        stop(0, 'red'),
+        stop(1, 'blue'),
+      ])]),
+      rect(10, 10, 180, 180, 'url(#lg)', { rx: 10 }),
+    ]);
+
+    // Radial: white → black
+    AbscomSVG.render('radial-demo', [
+      defs([radialGradient('rg', '50%', '50%', '50%', [
+        stop(0, 'white'),
+        stop(1, '#222'),
+      ])]),
+      circle(100, 100, 90, 'url(#rg)'),
+    ]);
+
+    // Multi-stop: rainbow
+    AbscomSVG.render('multi-demo', [
+      defs([linearGradient('rainbow', 0, 0, 1, 1, [
+        stop(0, 'red'),
+        stop(0.2, 'orange'),
+        stop(0.4, 'yellow'),
+        stop(0.6, 'green'),
+        stop(0.8, 'blue'),
+        stop(1, 'violet'),
+      ])]),
+      rect(10, 10, 180, 180, 'url(#rainbow)', { rx: 90 }),
+    ]);
+
+    // Angled linear gradient
+    AbscomSVG.render('angled-demo', [
+      defs([linearGradient('angled', 0, 1, 1, 0, [
+        stop(0, '#f0f'),
+        stop(1, '#0ff'),
+      ])]),
+      ellipse(100, 100, 80, 60, 'url(#angled)'),
+    ]);
+
+    // Radial with opacity stops
+    AbscomSVG.render('opacity-demo', [
+      defs([radialGradient('fade', '50%', '50%', '50%', [
+        stop(0, 'dodgerblue', 1),
+        stop(0.7, 'dodgerblue', 0.3),
+        stop(1, 'dodgerblue', 0),
+      ])]),
+      rect(10, 10, 180, 180, 'url(#fade)', { rx: 10 }),
+    ]);
+
+    // Animated gradient rect
+    const gradRect = {
+      ...rect(10, 10, 180, 180, 'url(#pulseGrad)', { rx: 10 }),
+      id: 'pulseRect',
+      children: [
+        animate('opacity', '1', '0.3', '1.5s', 'indefinite'),
+      ],
+    };
+    AbscomSVG.render('animated-demo', [
+      defs([linearGradient('pulseGrad', 0, 0, 0, 1, [
+        stop(0, 'mediumpurple'),
+        stop(1, 'hotpink'),
+      ])]),
+      gradRect,
+    ]);
+  </script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AbscomSVG — Composition</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 20px; }
+    h2 { margin: 1em 0 0.5em; }
+    .row { display: flex; gap: 20px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <h2>Composition & Reusability</h2>
+  <div class="row">
+    <div>
+      <h3>Symbol + Use</h3>
+      <svg id="symbol-demo" width="300" height="120" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div>
+      <h3>cloneDef</h3>
+      <svg id="clone-demo" width="300" height="120" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div>
+      <h3>mergeDefs</h3>
+      <svg id="merge-demo" width="300" height="120" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      <h3>Marker</h3>
+      <svg id="marker-demo" width="300" height="120" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div>
+      <h3>attr + attrs</h3>
+      <svg id="attr-demo" width="300" height="120" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div>
+      <h3>createDef</h3>
+      <svg id="createdef-demo" width="300" height="120" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+
+  <script src="/dist/abscomsvg.iife.js"></script>
+  <script>
+    const {
+      svg, defs, symbol, use, group, marker,
+      circle, rect, line, path, text,
+      withStroke, setFill, attr, attrs, removeAttr,
+      cloneDef, mergeDefs, createDef,
+      render,
+    } = AbscomSVG;
+
+    // --- Symbol + Use ---
+    const icon = symbol('star', '0 0 24 24', [
+      path('M12 2 L15 9 L22 9 L16 14 L18 21 L12 17 L6 21 L8 14 L2 9 L9 9 Z', 'gold'),
+    ]);
+
+    render('symbol-demo', [
+      defs([icon]),
+      use('#star', 10, 10, 30, 30),
+      use('#star', 50, 10, 30, 30, { fill: '#333' }),
+      use('#star', 90, 10, 30, 30),
+      use('#star', 130, 10, 30, 30),
+      use('#star', 170, 10, 30, 30),
+      use('#star', 210, 10, 30, 30),
+      use('#star', 250, 10, 30, 30),
+      text(10, 90, 'Symbol + Use — reusable icons', { fill: '#666', 'font-size': '14px' }),
+    ]);
+
+    // --- cloneDef ---
+    const base = circle(40, 40, 30, 'tomato');
+    withStroke(base, '#333', 2);
+
+    const cloned1 = cloneDef(base, { attrs: { cx: 120 } });
+    setFill(cloned1, 'dodgerblue');
+
+    const cloned2 = cloneDef(base, { attrs: { cx: 200 } });
+    setFill(cloned2, 'gold');
+
+    const cloned3 = cloneDef(base, {
+      attrs: { cx: 280 },
+      children: [{ type: 'animate', attrs: { attributeName: 'r', from: '30', to: '40', dur: '1s', repeatCount: 'indefinite' } }],
+    });
+    setFill(cloned3, 'mediumpurple');
+
+    render('clone-demo', [base, cloned1, cloned2, cloned3]);
+
+    // --- mergeDefs ---
+    const baseRect = rect(0, 0, 60, 60, 'dodgerblue');
+    const border = { attrs: { stroke: '#333', 'stroke-width': 3 } };
+    const rounded = { attrs: { rx: 8, ry: 8 } };
+
+    const a = mergeDefs(cloneDef(baseRect, { attrs: { x: 20, y: 20 } }), border);
+    const b = mergeDefs(cloneDef(baseRect, { attrs: { x: 100, y: 20 } }), border, rounded);
+    const c = mergeDefs(cloneDef(baseRect, { attrs: { x: 180, y: 20 } }), { attrs: { fill: 'tomato' } }, border, rounded);
+
+    render('merge-demo', [a, b, c]);
+
+    // --- Marker ---
+    const arrow = marker('arrow', { markerWidth: 10, markerHeight: 10, refX: 9, refY: 5, orient: 'auto' }, [
+      path('M0 0 L10 5 L0 10 Z', '#333'),
+    ]);
+
+    const arrowLine = line(20, 60, 280, 60, '#333');
+    attr(arrowLine, 'stroke-width', 2);
+    attr(arrowLine, 'marker-end', 'url(#arrow)');
+
+    render('marker-demo', [
+      defs([arrow]),
+      arrowLine,
+    ]);
+
+    // --- attr + attrs ---
+    const attrBox = rect(0, 0, 80, 80, 'none');
+    attr(attrBox, 'fill', 'mediumseagreen');
+    attr(attrBox, 'rx', 10);
+    attrs(attrBox, { x: 20, y: 20, stroke: '#333', 'stroke-width': 3 });
+
+    const cx = attr(attrBox, 'x');
+    const fill = attr(attrBox, 'fill');
+
+    render('attr-demo', [
+      attrBox,
+      text(20, 120, `x=${cx}, fill=${fill}`, { fill: '#666', 'font-size': '13px' }),
+    ]);
+
+    // --- createDef ---
+    const custom = createDef('custom', 'g', {}, [
+      createDef('bg', 'rect', { x: 20, y: 20, width: 60, height: 60, rx: 8, fill: 'rebeccapurple' }),
+      createDef('label', 'text', { x: 50, y: 58, fill: 'white', 'font-size': '14px', 'text-anchor': 'middle' }, undefined, 'SVG'),
+    ]);
+    // Fix: use text property on the text def
+    custom.children[1].text = 'SVG';
+
+    render('createdef-demo', [custom]);
+  </script>
+</body>
+</html>

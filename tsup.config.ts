@@ -14,7 +14,7 @@ export default defineConfig([
     sourcemap: true,
   },
   {
-    entry: ['src/browser.ts'],
+    entry: { abscomsvg: 'src/browser.ts' },
     format: ['iife'],
     globalName: 'AbscomSVG',
     outDir: 'dist',

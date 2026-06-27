@@ -14,12 +14,19 @@ TypeScript SVG framework packaged as a dual-format (ESM/CJS) npm module with a b
 ```
 src/
   index.ts      — Public API exports
-  types.ts      — SvgDef, EventHandler interfaces
-  elements.ts   — Creation helpers + withStroke/transform
-  renderer.ts   — DOM render, createElement, updateElement, validate (internal)
+  types.ts      — SvgDef, EventHandler, GradientStop interfaces
+  elements.ts   — All creation helpers + utilities (shapes, containers, gradients, transforms, style, composition, attr)
+  renderer.ts   — DOM render with RenderOptions (hooks, validate toggle)
   browser.ts    — IIFE entry for CDN (re-exports index)
 tests/
-  basic.test.ts — Smoke tests for element creation helpers
+  basic.test.ts — 88 tests covering all helpers and utilities
+docs/
+  overview.md, getting-started.md, guide.md, api-reference.md, architecture.md
+examples/
+  basic.html, smiley-face.html, animations.html, interactive.html,
+  dynamic-updates.html, gradients.html, transforms.html, composition.html,
+  bar-chart.html, clip-mask-pattern.html, interactive-drawing.html,
+  node-server.js
 ```
 
 ## Commands
@@ -46,20 +53,36 @@ These work in any runtime. `render()` reconciles them against real SVG DOM and r
 - Elements **without `id`** are always appended as new nodes.
 - Stale IDs (present in DOM but absent in latest `render()` call) are **removed**.
 
+## Renderer Options
+
+`render(svg, def, options?)` accepts a third `RenderOptions` argument:
+```ts
+interface RenderOptions {
+  validate?: boolean;           // enable/disable validation (default true)
+  beforeCreate?: (def) => def;  // hook before element creation
+  afterCreate?: (el, def) => void;  // hook after element creation
+  beforeUpdate?: (el, def) => def | false;  // return false to skip update
+  afterUpdate?: (el, def) => void;  // hook after element update
+}
+```
+
 ## API Quirks
 
-- `image(href, x, y, width, height)` sets `xlink:href` (not `href`).
-- `transform(type, ...values)` returns a **string** — caller must assign it to `def.attrs.transform`.
-- `withStroke(def, color, width)` mutates and returns `def`.
+- `image(href, x, y, width, height)` sets `xlink:href` (not `href`). Newer `use(href, x?, y?, width?, height?)` uses `href` (modern).
+- `transform(type, ...values)` returns a **string** — caller must assign it to `def.attrs.transform`. Also has named helpers: `translate`, `rotate`, `scale`, `skewX`, `skewY`, `composeTransforms`.
+- `withStroke(def, color, width)` mutates and returns `def`. Same pattern: `withClass`, `withStyle`, `withOpacity`, `setFill`, `attr` (setter mode), `removeAttr`.
+- `cloneDef(def, overrides?)` creates a deep clone (children recursively cloned).
+- `mergeDefs(...defs)` merges attrs/events/children, last-wins.
+- `attr(def, key)` — getter, `attr(def, key, value)` — setter.
 - Event handlers: `def.events.click = [fn | {callback, options}]` — array or single value.
-- Validation warnings for missing required attrs go to `console.error` but do not throw.
+- Validation warnings for missing required attrs go to `console.error` but do not throw. Set `validate: false` in render options to suppress.
 
 ## Browser / Node split
 
 | Function | Node/Bun | Browser |
 |---|---|---|
 | `circle`, `rect`, ... creation helpers | ✅ | ✅ |
-| `withStroke`, `transform` | ✅ | ✅ |
+| `withStroke`, `transform`, style utils | ✅ | ✅ |
 | `render()` | ❌ (throws) | ✅ |
 
 For server-side SVG generation, use helpers to build definitions and serialize manually.
@@ -67,7 +90,7 @@ For server-side SVG generation, use helpers to build definitions and serialize m
 ## Build Artifacts
 
 After build, `dist/` contains:
-- `abscomsvg.mjs` — ESM (`import { circle } from 'abscomsvg'`)
-- `abscomsvg.cjs` — CommonJS (`const { circle } = require('abscomsvg')`)
+- `index.mjs` — ESM (`import { circle } from 'abscomsvg'`)
+- `index.cjs` — CommonJS (`const { circle } = require('abscomsvg')`)
 - `abscomsvg.iife.js` — Browser global (`<script src="...">`, exposes `window.AbscomSVG`)
-- `index.d.ts`, `index.d.ts.map` — TypeScript declarations
+- `index.d.ts`, `index.d.cts` — TypeScript declarations

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AbscomSVG — Transforms & Style</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 20px; }
+    h2 { margin: 1em 0 0.5em; }
+    .row { display: flex; gap: 20px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <h2>Transforms & Style Utilities</h2>
+  <div class="row">
+    <div>
+      <h3>Composed</h3>
+      <svg id="composed-demo" width="200" height="200" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div>
+      <h3>withStyle</h3>
+      <svg id="style-demo" width="200" height="200" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div>
+      <h3>Path Builder</h3>
+      <svg id="path-demo" width="200" height="200" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      <h3>withClass</h3>
+      <svg id="class-demo" width="200" height="200" xmlns="http://www.w3.org/2000/svg"></svg>
+      <style>
+        .fill-red { fill: tomato; }
+        .fill-blue { fill: dodgerblue; }
+        .stroke-thick { stroke: #333; stroke-width: 3; }
+      </style>
+    </div>
+    <div>
+      <h3>Show / Hide</h3>
+      <svg id="showhide-demo" width="200" height="200" xmlns="http://www.w3.org/2000/svg"></svg>
+      <button id="toggleBtn">Toggle Circle</button>
+    </div>
+  </div>
+
+  <script src="/dist/abscomsvg.iife.js"></script>
+  <script>
+    const {
+      circle, rect, group, text, withStroke, withClass, withStyle, withOpacity,
+      setFill, stroke, show, hide,
+      translate, rotate, scale, skewX, composeTransforms, buildTransform,
+      PathBuilder, path,
+      render,
+    } = AbscomSVG;
+
+    // --- Composed transforms ---
+    const star = withStroke(
+      path('M100 20 L110 70 L160 70 L120 100 L135 150 L100 120 L65 150 L80 100 L40 70 L90 70 Z', 'gold'),
+      '#333', 2,
+    );
+
+    render('composed-demo', [
+      rect(0, 0, 200, 200, '#f5f5f5'),
+      {
+        ...star,
+        id: 'star',
+        attrs: {
+          ...star.attrs,
+          transform: composeTransforms(
+            translate(100, 100),
+            rotate(45, 100, 100),
+            scale(0.8),
+          ),
+        },
+      },
+      {
+        ...star,
+        attrs: {
+          ...star.attrs,
+          transform: composeTransforms(
+            translate(100, 100),
+            rotate(-30, 100, 100),
+            scale(0.4),
+          ),
+          opacity: 0.5,
+        },
+      },
+    ]);
+
+    // --- withStyle ---
+    const styleDef = rect(20, 20, 160, 160, 'none');
+    withStyle(styleDef, { fill: 'mediumseagreen', stroke: '#333', strokeWidth: 3, rx: 16 });
+    render('style-demo', [styleDef]);
+
+    // --- Path Builder ---
+    const d = new PathBuilder()
+      .M(30, 170)
+      .C(40, 30, 90, 10, 100, 100)
+      .Q(110, 130, 120, 70)
+      .A(30, 30, 0, 0, 1, 160, 140)
+      .S(170, 180, 180, 130)
+      .build();
+
+    const heartPath = path(d, 'none');
+    withStroke(heartPath, '#e25555', 4);
+    render('path-demo', [heartPath]);
+
+    // --- withClass ---
+    const c1 = circle(50, 80, 40);
+    withClass(c1, 'fill-red', 'stroke-thick');
+
+    const c2 = circle(130, 80, 40);
+    withClass(c2, 'fill-blue', 'stroke-thick');
+
+    render('class-demo', [c1, c2]);
+
+    // --- Show / Hide ---
+    const toggleCircle = circle(100, 100, 60, 'tomato');
+    const toggleLabel = text(50, 170, 'Click to hide', { fill: '#666', 'font-size': '14px' });
+    Object.assign(toggleCircle, {
+      id: 'toggleCircle',
+      events: {
+        click: [() => {
+          const shown = toggleCircle.attrs.display === 'none';
+          if (shown) {
+            show(toggleCircle);
+            toggleLabel.text = 'Click to hide';
+          } else {
+            hide(toggleCircle);
+            toggleLabel.text = 'Click to show';
+          }
+          render('showhide-demo', [toggleCircle, toggleLabel]);
+        }],
+      },
+    });
+    render('showhide-demo', [toggleCircle, toggleLabel]);
+  </script>
+</body>
+</html>

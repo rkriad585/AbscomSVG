@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AbscomSVG — Clip, Mask &amp; Pattern</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 900px;
+      margin: 2rem auto;
+      background: #f8f9fa;
+      padding: 0 1rem;
+      color: #333;
+    }
+    .demo {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .demo h2 {
+      margin-top: 0;
+      font-size: 1.2rem;
+      color: #444;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 0.5rem;
+    }
+    .demo p {
+      font-size: 0.9rem;
+      color: #666;
+      margin: 0.5rem 0 1rem;
+    }
+    svg {
+      display: block;
+      margin: 0 auto;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    code {
+      background: #eef;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       DEMO 1: clipPath
+       A clipping region restricts what part of a shape is visible.
+       Here we draw a rainbow gradient rect, then clip it into a
+       star shape — only the star portion of the gradient shows.
+       ============================================================ -->
+  <div class="demo">
+    <h2>1. clipPath — Star-shaped Clip</h2>
+    <p>
+      A <code>&lt;clipPath&gt;</code> defines a region.
+      Any element with <code>clip-path="url(#starClip)"</code> is only
+      visible where the star overlaps it. Try changing the star's points!
+    </p>
+    <svg id="canvas-clip" width="300" height="200" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <!-- ============================================================
+       DEMO 2: mask
+       A mask uses black/white (or alpha) to control visibility.
+       White = fully visible, black = hidden, grey = semi-transparent.
+       Here a gradient background is masked by text — the text is
+       "cut out" so the gradient only shows through the letters.
+       ============================================================ -->
+  <div class="demo">
+    <h2>2. Mask — Text Cut Out of a Gradient</h2>
+    <p>
+      A <code>&lt;mask&gt;</code> uses white for "show" and black for
+      "hide". The white text reveals the rainbow gradient behind it.
+      The black rectangle hides everything else.
+    </p>
+    <svg id="canvas-mask" width="400" height="180" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <!-- ============================================================
+       DEMO 3: pattern
+       A pattern defines a small tile that repeats to fill any shape.
+       Here we make a dot pattern and use it to fill a large circle.
+       ============================================================ -->
+  <div class="demo">
+    <h2>3. Pattern — Dot Swirl</h2>
+    <p>
+      A <code>&lt;pattern&gt;</code> is a reusable tile. We draw a tiny
+      square (20×20) with a dot in it, then fill a large circle with
+      <code>url(#dotPattern)</code>. Also see the stripes variant below.
+    </p>
+    <svg id="canvas-pattern" width="400" height="200" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <script src="/dist/abscomsvg.iife.js"></script>
+  <script>
+    // We use AbscomSVG throughout via the global. For readability,
+    // destructure the helpers we'll use most.
+    const {
+      svg, group, defs, clipPath, mask,
+      rect, circle, polygon, text,
+      linearGradient, radialGradient, stop,
+      pattern, use,
+      withStyle, setFill,
+      translate, rotate,
+    } = AbscomSVG;
+
+    // ================================================================
+    // HELPER: rainbow gradient used across all demos
+    // ================================================================
+    function rainbowStops() {
+      return [
+        stop(0,    '#ff0066'),
+        stop(0.25, '#ffcc00'),
+        stop(0.5,  '#00cc66'),
+        stop(0.75, '#0066ff'),
+        stop(1,    '#9933ff'),
+      ];
+    }
+
+    // ================================================================
+    // DEMO 1 — clipPath
+    // ================================================================
+    // A star shape created from a polygon. Any element clipped to
+    // this star will only show through the star's outline.
+    // ================================================================
+    (function demoClip() {
+      // 1. Define the clipping shape: a 5-pointed star
+      //    These (x,y) pairs trace a star centered at (150,100).
+      const starPoints = [
+        '150,20',   // top
+        '180,80',   // inner right-up
+        '245,80',   // outer right
+        '195,125',  // inner right-down
+        '215,190',  // bottom-right
+        '150,155',  // bottom-center (inner)
+        '85,190',   // bottom-left
+        '105,125',  // inner left-down
+        '55,80',    // outer left
+        '120,80',   // inner left-up
+      ].join(' ');
+
+      // 2. Build the clipPath definition
+      //    clipPath('starClip', [ ...shapes ]) creates a <clipPath id="starClip">
+      const starClip = clipPath('starClip', [
+        polygon(starPoints),  // the star polygon becomes the clipping region
+      ]);
+
+      // 3. The content to clip: a full-size rect filled with a gradient
+      const bgGradient = linearGradient('clipGrad', 0, 0, 1, 1, rainbowStops());
+      const clippedRect = rect(0, 0, 300, 200, undefined, {
+        fill: 'url(#clipGrad)',
+        'clip-path': 'url(#starClip)',          // <-- this activates the clip
+      });
+
+      // 4. Render: defs holds the reusable definitions, then the clipped rect
+      AbscomSVG.render('canvas-clip', [
+        svg(300, 200, '0 0 300 200'),
+        defs([bgGradient, starClip]),
+        clippedRect,
+      ]);
+    })();
+
+    // ================================================================
+    // DEMO 2 — mask
+    // ================================================================
+    // A mask uses luminance: white (or high alpha) = visible,
+    // black (or low alpha) = hidden. We render white text on a
+    // black background inside the mask. That means only the text
+    // portion will be "visible" when applied to our gradient rect.
+    // ================================================================
+    (function demoMask() {
+      // 1. Create the mask definition
+      //    White text on black rect → only the text reveals the content
+      const textMask = mask('textMask', [
+        rect(0, 0, 400, 180, 'black'),             // hide everything by default
+        text(200, 110, 'SVG', {                     // white text → visible area
+          fill: 'white',
+          'font-size': '90px',
+          'font-weight': 'bold',
+          'text-anchor': 'middle',
+          'font-family': 'system-ui, sans-serif',
+        }),
+      ]);
+
+      // 2. Background: a rainbow gradient rect
+      const maskGradient = linearGradient('maskGrad', 0, 0, 1, 0, rainbowStops());
+      const maskedRect = rect(0, 0, 400, 180, undefined, {
+        fill: 'url(#maskGrad)',
+        mask: 'url(#textMask)',                     // <-- activates the mask
+      });
+
+      // 3. Optional: a subtle stroke around the SVG bounds
+      const border = rect(0.5, 0.5, 399, 179, 'none', {
+        stroke: '#ccc',
+        'stroke-width': 1,
+      });
+
+      AbscomSVG.render('canvas-mask', [
+        svg(400, 180, '0 0 400 180'),
+        defs([maskGradient, textMask]),
+        maskedRect,
+        border,
+      ]);
+    })();
+
+    // ================================================================
+    // DEMO 3 — pattern
+    // ================================================================
+    // A pattern is like a stamp: define it once in <defs>, then use
+    // it as a fill anywhere. Here we create two patterns — dots and
+    // stripes — and use both in one scene.
+    // ================================================================
+    (function demoPattern() {
+      // 1. Dot pattern: a 20×20 tile with a small circle
+      //    pattern('id', width, height, [child shapes])
+      const dotPat = (() => {
+        const tile = group([
+          rect(0, 0, 20, 20, '#e0e0e0'),            // light grey background
+          circle(10, 10, 5, '#ff6600'),             // orange dot in center
+        ]);
+        // Manually build a pattern def since there's no dedicated helper
+        return {
+          type: 'pattern',
+          attrs: { id: 'dotPattern', width: 20, height: 20, patternUnits: 'userSpaceOnUse' },
+          children: [tile],
+        };
+      })();
+
+      // 2. Stripe pattern: diagonal lines
+      const stripePat = (() => {
+        const stripe = group([
+          rect(0, 0, 30, 30, '#f0f0f0'),
+          // diagonal stripe through the tile
+          { type: 'line', attrs: { x1: 0, y1: 30, x2: 30, y2: 0, stroke: '#3366cc', 'stroke-width': 6 } },
+        ]);
+        return {
+          type: 'pattern',
+          attrs: { id: 'stripePattern', width: 30, height: 30, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' },
+          children: [stripe],
+        };
+      })();
+
+      // 3. Shapes filled with each pattern
+      //    Left circle — filled with dot pattern
+      const dotCircle = withStyle(
+        circle(100, 100, 80),
+        { fill: 'url(#dotPattern)', stroke: '#333', strokeWidth: 3 },
+      );
+
+      //    Right circle — filled with stripe pattern
+      const stripeCircle = withStyle(
+        circle(300, 100, 80),
+        { fill: 'url(#stripePattern)', stroke: '#333', strokeWidth: 3 },
+      );
+
+      // 4. Label each shape
+      const dotLabel = text(100, 195, 'Dot Pattern', {
+        fill: '#555', 'font-size': '12px', 'text-anchor': 'middle',
+      });
+      const stripeLabel = text(300, 195, 'Stripe Pattern', {
+        fill: '#555', 'font-size': '12px', 'text-anchor': 'middle',
+      });
+
+      AbscomSVG.render('canvas-pattern', [
+        svg(400, 200, '0 0 400 200'),
+        defs([dotPat, stripePat]),
+        dotCircle,
+        stripeCircle,
+        dotLabel,
+        stripeLabel,
+      ]);
+    })();
+  </script>
+</body>
+</html>

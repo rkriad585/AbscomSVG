@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AbscomSVG — Interactive Drawing</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 700px;
+      margin: 2rem auto;
+      background: #1e1e2e;
+      padding: 0 1rem;
+      color: #cdd6f4;
+    }
+    .app {
+      background: #313244;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .toolbar h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #cdd6f4;
+    }
+    .toolbar button {
+      background: #45475a;
+      color: #cdd6f4;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background 0.15s;
+    }
+    .toolbar button:hover {
+      background: #585b70;
+    }
+    .toolbar .counter {
+      font-size: 0.85rem;
+      color: #a6adc8;
+      background: #45475a;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+    }
+    .toolbar .hint {
+      font-size: 0.8rem;
+      color: #6c7086;
+      margin-left: auto;
+    }
+    svg {
+      display: block;
+      width: 100%;
+      border-radius: 8px;
+      background: #181825;
+      cursor: crosshair;
+    }
+    .selected-color {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+    }
+    .color-swatch {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid #585b70;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="toolbar">
+      <h2>🎨 Drawing Canvas</h2>
+      <button id="clearBtn">Clear</button>
+      <span class="counter" id="counter">Circles: 0</span>
+      <span class="selected-color">
+        Next color:
+        <span class="color-swatch" id="colorPreview" style="background: #f38ba8;"></span>
+      </span>
+      <span class="hint">Click canvas → place · Click circle → recolor</span>
+    </div>
+    <svg id="canvas" width="650" height="400" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <script src="/dist/abscomsvg.iife.js"></script>
+  <script>
+    // ============================================================
+    // Interactive Drawing App
+    //
+    // This demonstrates three core AbscomSVG concepts:
+    //   1. Event handling (click on shapes)
+    //   2. Re-rendering with ID-based diffing
+    //   3. Dynamic data → SVG mapping
+    //
+    // Each circle we draw gets a unique ID. When we re-render,
+    // AbscomSVG matches elements by ID and updates them in-place
+    // instead of rebuilding the DOM from scratch. This is how we
+    // change a circle's color without removing and re-adding it.
+    // ============================================================
+
+    // ============================================================
+    // 1. Application state
+    //    In a real app you might use a state library, but for this
+    //    demo a simple array and variables are enough.
+    // ============================================================
+    const circles = [];         // each entry: { id, cx, cy, fill }
+    let nextId = 0;             // unique counter for circle IDs
+    let counterEl = document.getElementById('counter');
+    let colorPreview = document.getElementById('colorPreview');
+
+    // Palette: each click on a circle cycles through these colors
+    const palette = ['#f38ba8', '#fab387', '#f9e2af', '#a6e3a1', '#89b4fa', '#cba6f7', '#94e2d5'];
+
+    // ============================================================
+    // 2. Render function
+    //    Reads the `circles` array and builds the full SVG scene
+    //    from scratch (as definition objects). render() then
+    //    reconciles with the real DOM — elements with IDs get
+    //    updated in-place, elements without IDs are appended.
+    // ============================================================
+    function render() {
+      // Map each circle in state to an SVG circle element.
+      // Every circle gets an `id` so re-renders are efficient.
+      const circleDefs = circles.map(c =>
+        AbscomSVG.withStyle(
+          // Spread the base circle def and add an id and click handler
+          Object.assign(AbscomSVG.circle(c.cx, c.cy, 18, c.fill), {
+            id: c.id,                                     // ← ID-based diffing key
+            events: {
+              click: () => handleCircleClick(c.id),       // ← event on the shape
+            },
+          }),
+          { cursor: 'pointer', stroke: '#585b70', strokeWidth: 2 },
+        ),
+      );
+
+      // Static hint text (no id — gets appended once and never changes)
+      const hint = AbscomSVG.text(16, 30, 'Click anywhere to draw', {
+        fill: '#6c7086',
+        'font-size': '13px',
+      });
+
+      // Render — pass the full scene definition
+      // AbscomSVG handles the diff: existing IDs update, new IDs append,
+      // missing IDs are removed.
+      AbscomSVG.render('canvas', [
+        hint,
+        ...circleDefs,
+      ]);
+
+      // Update the counter display
+      counterEl.textContent = `Circles: ${circles.length}`;
+    }
+
+    // ============================================================
+    // 3. Event handlers
+    // ============================================================
+
+    // --- 3a. Click on the SVG canvas (background) to place a circle
+    function handleCanvasClick(event) {
+      const svgEl = document.getElementById('canvas');
+      const rect = svgEl.getBoundingClientRect();
+
+      // Convert mouse coordinates from viewport to SVG space
+      const cx = event.clientX - rect.left;
+      const cy = event.clientY - rect.top;
+
+      // Pick a random color from the palette
+      const fill = palette[Math.floor(Math.random() * palette.length)];
+
+      // Push a new circle into state with a unique ID
+      circles.push({
+        id: `circle-${nextId++}`,     // ← unique, stable ID for diffing
+        cx,
+        cy,
+        fill,
+      });
+
+      // Update the color preview swatch
+      colorPreview.style.background = fill;
+
+      // Re-render — only the new circle is added to the DOM
+      render();
+    }
+
+    // --- 3b. Click on an existing circle to cycle its color
+    function handleCircleClick(id) {
+      // Find the circle in our state array
+      const circle = circles.find(c => c.id === id);
+      if (!circle) return;
+
+      // Cycle to the next color in the palette
+      const currentIndex = palette.indexOf(circle.fill);
+      const nextColor = palette[(currentIndex + 1) % palette.length];
+      circle.fill = nextColor;
+
+      // Update preview swatch
+      colorPreview.style.background = nextColor;
+
+      // Re-render — the clicked circle's DOM element is found by ID
+      // and updated in-place (no remove + re-add).
+      render();
+    }
+
+    // --- 3c. Clear button — remove all circles
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      circles.length = 0;       // empty the array
+      nextId = 0;               // reset counter (old IDs are gone)
+      colorPreview.style.background = palette[0];
+      render();                 // re-render → all circles removed from DOM
+    });
+
+    // ============================================================
+    // 4. Wire up the canvas click handler and do the first render
+    // ============================================================
+    document.getElementById('canvas').addEventListener('click', handleCanvasClick);
+
+    // Initial empty render
+    render();
+  </script>
+</body>
+</html>

@@ -1,53 +1,52 @@
 # AbscomSVG Overview
 
-AbscomSVG is a lightweight TypeScript framework for dynamic SVG generation and manipulation. It lets you create, update, and animate SVG elements using declarative JavaScript objects instead of raw DOM APIs.
+A lightweight TypeScript framework for creating and managing SVG graphics using plain JavaScript objects. Works in browsers, Node.js, and Bun.
 
-## What it does
+## What is AbscomSVG?
 
-- **Declarative SVG creation** — Build SVG elements via plain object definitions: `circle(10, 20, 30, 'red')` returns `{ type: 'circle', attrs: { cx: 10, cy: 20, r: 30, fill: 'red' } }`.
-- **DOM-diffing renderer** — `render()` reconciles definition objects against real SVG DOM, updating only what changed (keyed by `id`).
-- **Animation** — Supports SVG `<animate>` children for declarative animations.
-- **Event handling** — Attach DOM events to SVG elements with support for options like `{ once: true }`.
-
-## Key design decisions
-
-### Definition objects, not DOM elements
-
-All creation helpers return plain JavaScript objects. This means:
-
-- **Works in any runtime** — Node.js, Bun, Deno, and browser can all build definitions.
-- **No DOM dependency for creation** — Only `render()` requires a browser.
-- **Simple to serialize** — Definitions can be serialized to SVG markup or JSON.
-
-### ID-based diffing
-
-Elements with an `id` attribute are updated in-place on subsequent `render()` calls. Elements without `id` are appended as new nodes each time. This makes efficient updates straightforward:
+Most SVG libraries either (a) wrap every SVG tag in a heavy class hierarchy, or (b) make you write raw template strings. AbscomSVG takes a middle path: **plain-object definitions** that describe SVG elements without creating DOM nodes.
 
 ```js
-// First render
-render('svg', [{ ...circle(10, 10, 20, 'red'), id: 'dot' }]);
-
-// Second render — 'dot' updates in-place, no DOM removal/recreation
-render('svg', [{ ...circle(20, 20, 30, 'blue'), id: 'dot' }]);
+// A circle as a plain object — no DOM needed
+const c = circle(50, 50, 40, 'gold')
+// → { type: 'circle', attrs: { cx: 50, cy: 50, r: 40, fill: 'gold' } }
 ```
 
-### Browser / Node.js split
+This means your SVG description is just data — you can create it on a server, in a test, or in a browser worker. Only when you call `render()` does it touch the DOM.
 
-| Layer | Browser | Node.js / Bun |
-|-------|---------|---------------|
-| Creation helpers (`circle`, `rect`, ...) | ✅ | ✅ |
-| Modifiers (`withStroke`, `transform`) | ✅ | ✅ |
-| `render()` | ✅ | ❌ (throws) |
+## Who is this for?
 
-## Package structure
+- **Beginners** who want to create SVG graphics without learning low-level DOM APIs
+- **App developers** who need dynamic, data-driven SVG (charts, diagrams, games)
+- **Backend developers** generating SVG on the server (e.g., API responses, PDF generation)
 
+## Key Ideas
+
+| Concept | What it means |
+|---|---|
+| **Definition objects** | Every shape is a plain `{ type, attrs }` object — no DOM, no `new` keyword |
+| **ID-based diffing** | Elements with an `id` update in-place on re-render; elements without `id` are recreated |
+| **50+ helpers** | Shapes, containers, gradients, animations, transforms, path builder, color utilities |
+| **No dependencies** | Zero runtime packages — just TypeScript and tsup for building |
+| **Dual module** | ESM (`.mjs`), CommonJS (`.cjs`), and browser IIFE all from one build |
+
+## Quick Example
+
+```html
+<script src="https://unpkg.com/abscomsvg"></script>
+<script>
+  AbscomSVG.render('mySvg', [
+    AbscomSVG.circle(100, 100, 80, 'steelblue'),
+    AbscomSVG.rect(160, 40, 120, 90, 'coral'),
+    AbscomSVG.text(40, 220, 'Hello SVG!', { fill: '#333', 'font-size': '22px' }),
+  ]);
+</script>
 ```
-src/
-  index.ts      — Public API: re-exports all helpers, render, and types
-  types.ts      — SvgDef & EventHandler interfaces
-  elements.ts   — Creation helpers (circle, rect, ...) + withStroke, transform
-  renderer.ts   — DOM rendering: render(), createElement(), updateElement()
-  browser.ts    — IIFE/CDN entrypoint
-```
 
-For server-side SVG generation, use the creation helpers to build definitions and serialize the objects to SVG markup yourself. See `examples/node-server.js`.
+## Next Steps
+
+- **[Getting Started](./getting-started.md)** — Install and create your first SVG
+- **[Guide](./guide.md)** — Walk through every feature with examples
+- **[API Reference](./api-reference.md)** — Complete function listing
+- **[Architecture](./architecture.md)** — How the library works inside
+- **[Examples](../examples/)** — Runnable HTML files (open in browser)
