@@ -257,8 +257,10 @@ function updateElement(el: SVGElement, def: SvgDef, options?: RenderOptions): vo
  * ---
  *
  * @param svgArg - The target SVG container.
- *  - **string**: an `id` of an existing `<svg>` element in the DOM
- *    (`document.getElementById` is used internally).
+ *  - **string**: an `id` or CSS selector of an existing `<svg>` element.
+ *    Both `'mySvg'` and `'#mySvg'` work — the `#` prefix is stripped
+ *    before calling `document.getElementById`, with a `querySelector`
+ *    fallback for more complex selectors.
  *  - **SVGElement**: a direct reference to an `<svg>` element.
  *
  * @param def - One or more definition objects to render.
@@ -347,16 +349,20 @@ export function render(svgArg: string | SVGElement, def: SvgDef | SvgDef[], opti
 
   let svg: SVGElement | null;
   if (typeof svgArg === 'string') {
-    svg = document.getElementById(svgArg) as SVGElement | null;
+    // Strip leading '#' if present (accept both '#mySvg' and 'mySvg')
+    const id = svgArg.startsWith('#') ? svgArg.slice(1) : svgArg;
+    svg = document.getElementById(id) as SVGElement | null;
+    // Fallback: try querySelector (handles complex selectors)
+    if (!svg) svg = document.querySelector<SVGElement>(svgArg);
   } else if (svgArg instanceof SVGElement) {
     svg = svgArg;
   } else {
-    console.error('Invalid SVG argument:', svgArg);
+    console.error(`Invalid SVG argument — expected a string or SVGElement, got ${typeof svgArg}`);
     return;
   }
 
   if (!svg) {
-    console.error('SVG element not found');
+    console.error(`SVG element not found: ${svgArg}`);
     return;
   }
 
