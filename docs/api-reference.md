@@ -507,6 +507,102 @@ animationSet('visibility', 'hidden', 'click')
 
 ---
 
+## Enhanced Animation Helpers
+
+High-level animation wrappers that produce ready-to-use `<g>` containers with `<animate>` or `<animateTransform>` children.
+
+### easing
+
+```ts
+easing(name: string): Record<string, string>
+```
+
+Returns SVG easing attributes for a named curve. Recognized names: `'linear'`, `'ease'`, `'ease-in'`, `'ease-out'`, `'ease-in-out'`, `'bounce'`. Unknown names default to `calcMode: 'linear'`.
+
+Spread the result into an `<animate>` or `<animateTransform>` element:
+
+```js
+{
+  type: 'animate',
+  attrs: {
+    attributeName: 'opacity',
+    from: '0', to: '1', dur: '1s',
+    ...easing('ease-in-out'),
+  },
+}
+```
+
+### fadeIn / fadeOut
+
+```ts
+fadeIn(def: SvgDef, dur?: string): SvgDef
+fadeOut(def: SvgDef, dur?: string): SvgDef
+```
+
+Wrap `def` in a `<g>` with an opacity animation. Default duration is `'1s'`. After the animation, `fill="freeze"` holds the final state.
+
+```js
+fadeIn(circle(50, 50, 40, 'red'), '2s')
+```
+
+### pulse
+
+```ts
+pulse(def: SvgDef, attr: string, from: string | number, to: string | number, dur?: string): SvgDef
+```
+
+Mutates `def` in-place by adding an `<animate>` child that oscillates `attr` between `from` and `to`. Repeats indefinitely.
+
+```js
+pulse(circle(50, 50, 30, 'red'), 'r', '30', '40', '1s')
+```
+
+### spin
+
+```ts
+spin(def: SvgDef, dur?: string): SvgDef
+```
+
+Mutates `def` in-place by adding an `animateTransform` that rotates 0° → 360°. Uses `cx`/`cy` from the target element, or defaults to `(50, 50)`.
+
+```js
+spin(circle(50, 50, 30, 'gold'), '3s')
+```
+
+### bounce
+
+```ts
+bounce(def: SvgDef, dur?: string): SvgDef
+```
+
+Vertical Y-oscillation via `animateTransform(type="translate")`. Default duration `'1s'`.
+
+### shake
+
+```ts
+shake(def: SvgDef, dur?: string): SvgDef
+```
+
+Horizontal X-oscillation with multiple keyframes for a rapid shake. Default `'0.3s'`.
+
+### slideIn
+
+```ts
+slideIn(def: SvgDef, dir?: string, dur?: string): SvgDef
+```
+
+Slides element in from `'left'` (default), `'right'`, `'top'`, or `'bottom'`. Uses `fill="freeze"`.
+
+### grow
+
+```ts
+grow(def: SvgDef, dur?: string): SvgDef
+```
+
+Scales from 0 to 1 via `animateTransform(type="scale")`. Default `'0.5s'`. Scales from origin `(0,0)` — wrap in a `<g>` with `translate` to scale from center.
+
+---
+
 ## Transform Helpers
 
 All return **strings**. Assign to `def.attrs.transform`.

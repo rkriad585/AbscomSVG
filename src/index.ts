@@ -91,6 +91,18 @@ export {
 } from './color';
 
 export {
+  easing,
+  fadeIn,
+  fadeOut,
+  pulse,
+  spin,
+  bounce,
+  shake,
+  slideIn,
+  grow,
+} from './animation';
+
+export {
   FilterBuilder,
   dropShadow,
   blur,

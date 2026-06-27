@@ -423,6 +423,48 @@ Sets an attribute instantly at a specific time (no transition):
 
 ---
 
+### Easing curves
+
+Use `easing()` to get SVG `calcMode`, `keySplines`, and `keyTimes` for a named curve:
+
+```js
+{
+  type: 'animate',
+  attrs: {
+    attributeName: 'opacity',
+    from: '0', to: '1', dur: '1s',
+    ...easing('ease-in-out'),
+  },
+}
+```
+
+Supported names: `'linear'`, `'ease'`, `'ease-in'`, `'ease-out'`, `'ease-in-out'`, `'bounce'`.
+
+### Convenience animation wrappers
+
+These helpers create common animations without writing raw `<animate>` definitions:
+
+| Helper | What it does |
+|---|---|
+| `fadeIn(def, dur?)` | Wraps in `<g>` with opacity 0→1 (fill=freeze) |
+| `fadeOut(def, dur?)` | Wraps in `<g>` with opacity 1→0 (fill=freeze) |
+| `pulse(def, attr, from, to, dur?)` | Mutates def: oscillates `attr` indefinitely |
+| `spin(def, dur?)` | Mutates def: continuous 360° rotation |
+| `bounce(def, dur?)` | Mutates def: vertical Y bounce |
+| `shake(def, dur?)` | Mutates def: horizontal X shake |
+| `slideIn(def, dir?, dur?)` | Mutates def: slide from `left/right/top/bottom` |
+| `grow(def, dur?)` | Mutates def: scale 0→1 |
+
+Mutating helpers (`pulse`, `spin`, `bounce`, `shake`, `slideIn`, `grow`) return the original `def` with an `<animate>` or `<animateTransform>` child appended:
+
+```js
+const box = rect(50, 50, 100, 100, 'coral');
+pulse(box, 'rx', '0', '20', '1s');
+// box.children now contains the animate definition
+```
+
+---
+
 ## Transforms
 
 All transform helpers return **strings**. Assign them to `def.attrs.transform`.

@@ -11,6 +11,15 @@ import {
   animate,
   animateTransform,
   animationSet,
+  easing,
+  fadeIn,
+  fadeOut,
+  pulse,
+  spin,
+  bounce,
+  shake,
+  slideIn,
+  grow,
   regularPolygon,
   star,
   arrow,
@@ -500,6 +509,112 @@ describe('animation helpers', () => {
   test('animationSet without begin', () => {
     const def = animationSet('opacity', '0');
     expect(def.attrs.begin).toBeUndefined();
+  });
+});
+
+describe('enhanced animation helpers', () => {
+  test('easing linear', () => {
+    expect(easing('linear')).toEqual({ calcMode: 'linear' });
+  });
+
+  test('easing returns spline values for known names', () => {
+    const e = easing('ease-in-out');
+    expect(e.calcMode).toBe('spline');
+    expect(e.keySplines).toBe('0.42 0 0.58 1');
+    expect(e.keyTimes).toBe('0;1');
+  });
+
+  test('easing defaults to linear for unknown names', () => {
+    expect(easing('unknown')).toEqual({ calcMode: 'linear' });
+  });
+
+  test('fadeIn wraps in g with opacity animate', () => {
+    const def = fadeIn(circle(10, 10, 5, 'red'), '2s');
+    expect(def.type).toBe('g');
+    expect(def.children).toHaveLength(2);
+    expect(def.children![1].type).toBe('animate');
+    expect(def.children![1].attrs.attributeName).toBe('opacity');
+    expect(def.children![1].attrs.from).toBe('0');
+    expect(def.children![1].attrs.to).toBe('1');
+    expect(def.children![1].attrs.dur).toBe('2s');
+    expect(def.children![1].attrs.fill).toBe('freeze');
+  });
+
+  test('fadeOut wraps in g with opacity animate from 1 to 0', () => {
+    const def = fadeOut(circle(10, 10, 5, 'red'), '1.5s');
+    expect(def.children![1].attrs.from).toBe('1');
+    expect(def.children![1].attrs.to).toBe('0');
+  });
+
+  test('pulse adds animate with values oscillation', () => {
+    const def = pulse(circle(50, 50, 30, 'red'), 'r', '30', '40', '1s');
+    expect(def.children).toHaveLength(1);
+    expect(def.children![0].attrs.values).toBe('30;40;30');
+    expect(def.children![0].attrs.keyTimes).toBe('0;0.5;1');
+    expect(def.children![0].attrs.repeatCount).toBe('indefinite');
+  });
+
+  test('pulse mutates original def', () => {
+    const def = circle(50, 50, 30, 'red');
+    const result = pulse(def, 'opacity', '1', '0.3');
+    expect(result).toBe(def);
+  });
+
+  test('spin adds rotate animateTransform', () => {
+    const def = spin(circle(50, 50, 30, 'gold'), '3s');
+    expect(def.children![0].type).toBe('animateTransform');
+    expect(def.children![0].attrs.type).toBe('rotate');
+    expect(def.children![0].attrs.from).toBe('0 50 50');
+    expect(def.children![0].attrs.to).toBe('360 50 50');
+    expect(def.children![0].attrs.dur).toBe('3s');
+    expect(def.children![0].attrs.repeatCount).toBe('indefinite');
+  });
+
+  test('spin uses default center for elements without cx/cy', () => {
+    const def = spin(rect(0, 0, 100, 50, 'blue'));
+    expect(def.children![0].attrs.from).toBe('0 50 50');
+  });
+
+  test('bounce adds translate animateTransform with Y oscillation', () => {
+    const def = bounce(circle(50, 50, 20, 'orange'), '0.8s');
+    expect(def.children![0].attrs.values).toBe('0 0; 0 -20; 0 0');
+    expect(def.children![0].attrs.dur).toBe('0.8s');
+  });
+
+  test('shake adds translate animateTransform with X oscillation', () => {
+    const def = shake(circle(50, 50, 20, 'red'), '0.2s');
+    expect(def.children![0].attrs.values).toContain('-5 0');
+    expect(def.children![0].attrs.values).toContain('5 0');
+  });
+
+  test('slideIn from left', () => {
+    const def = slideIn(rect(50, 50, 100, 80, 'blue'), 'left', '0.5s');
+    expect(def.children![0].attrs.from).toBe('-200,0');
+    expect(def.children![0].attrs.to).toBe('0,0');
+    expect(def.children![0].attrs.fill).toBe('freeze');
+  });
+
+  test('slideIn from top', () => {
+    const def = slideIn(circle(50, 50, 30, 'red'), 'top');
+    expect(def.children![0].attrs.from).toBe('0,-200');
+  });
+
+  test('slideIn from bottom', () => {
+    const def = slideIn(circle(50, 50, 30, 'red'), 'bottom');
+    expect(def.children![0].attrs.from).toBe('0,200');
+  });
+
+  test('slideIn defaults to left', () => {
+    const def = slideIn(circle(50, 50, 30, 'red'));
+    expect(def.children![0].attrs.from).toBe('-200,0');
+  });
+
+  test('grow adds scale animateTransform', () => {
+    const def = grow(circle(0, 0, 30, 'green'), '0.6s');
+    expect(def.children![0].attrs.type).toBe('scale');
+    expect(def.children![0].attrs.from).toBe('0');
+    expect(def.children![0].attrs.to).toBe('1');
+    expect(def.children![0].attrs.fill).toBe('freeze');
   });
 });
 

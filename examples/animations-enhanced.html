@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AbscomSVG — Enhanced Animations</title>
+  <style>
+    body { font-family: system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; background: #1a1a2e; color: #eee; gap: 32px; padding: 20px; }
+    h2 { margin: 0; }
+    h3 { margin: 0 0 4px; font-size: 0.9rem; color: #aaa; }
+    .row { display: flex; gap: 32px; flex-wrap: wrap; justify-content: center; }
+    .card { display: flex; flex-direction: column; align-items: center; }
+    svg { border-radius: 8px; background: #16213e; }
+    button { padding: 8px 20px; border: none; border-radius: 6px; background: #0f3460; color: #fff; cursor: pointer; font-size: 0.9rem; margin: 4px; }
+    button:hover { background: #1a5276; }
+  </style>
+</head>
+<body>
+  <h2>Enhanced Animations</h2>
+
+  <div class="row">
+    <div class="card">
+      <h3>Fade In</h3>
+      <svg id="fade-in-svg" width="150" height="150" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="card">
+      <h3>Fade Out</h3>
+      <svg id="fade-out-svg" width="150" height="150" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="card">
+      <h3>Pulse</h3>
+      <svg id="pulse-svg" width="150" height="150" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h3>Spin</h3>
+      <svg id="spin-svg" width="150" height="150" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="card">
+      <h3>Bounce</h3>
+      <svg id="bounce-svg" width="150" height="150" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="card">
+      <h3>Shake</h3>
+      <svg id="shake-svg" width="150" height="150" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h3>Slide In</h3>
+      <svg id="slide-svg" width="150" height="150" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="card">
+      <h3>Grow</h3>
+      <svg id="grow-svg" width="150" height="150" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="card">
+      <h3>Easing Curves</h3>
+      <svg id="easing-svg" width="300" height="150" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+
+  <div>
+    <button id="replay-btn">Replay All</button>
+  </div>
+
+  <script src="/dist/abscomsvg.iife.js"></script>
+  <script>
+    const { circle, rect, group, fadeIn, fadeOut, pulse, spin, bounce, shake, slideIn, grow, easing, render } = AbscomSVG;
+
+    function fadeInDemo() {
+      render('fade-in-svg', fadeIn(circle(75, 75, 40, '#e94560'), '1.5s'));
+    }
+
+    function fadeOutDemo() {
+      render('fade-out-svg', fadeOut(circle(75, 75, 40, '#e94560'), '2s'));
+    }
+
+    function pulseDemo() {
+      const c = circle(75, 75, 30, '#0f3460');
+      render('pulse-svg', group(pulse(c, 'r', '30', '50', '1s')));
+    }
+
+    function spinDemo() {
+      const r = rect(35, 35, 80, 80, '#e94560');
+      render('spin-svg', group(spin(r, '2s')));
+    }
+
+    function bounceDemo() {
+      const c = circle(75, 75, 25, '#533483');
+      render('bounce-svg', group(bounce(c, '0.8s')));
+    }
+
+    function shakeDemo() {
+      const c = circle(75, 75, 35, '#e94560');
+      render('shake-svg', group(shake(c, '0.4s')));
+    }
+
+    function slideDemo() {
+      const r = rect(25, 25, 100, 80, '#0f3460');
+      render('slide-svg', group(slideIn(r, 'left', '0.6s')));
+    }
+
+    function growDemo() {
+      const c = circle(0, 0, 30, '#533483');
+      render('grow-svg', group(grow(c, '0.6s')));
+    }
+
+    function easingDemo() {
+      // Three circles moving down with different easings
+      const rows = [
+        { easing: 'ease-in', y: 100, color: '#e94560' },
+        { easing: 'ease-out', y: 100, color: '#0f3460' },
+        { easing: 'bounce', y: 100, color: '#533483' },
+      ];
+      const defs = rows.map((row, i) => {
+        const c = circle(50 + i * 100, 30, 20, row.color);
+        c.children = [{
+          type: 'animate',
+          attrs: {
+            attributeName: 'cy',
+            values: '30;120;30',
+            dur: '2s',
+            repeatCount: 'indefinite',
+            ...easing(row.easing),
+            fill: 'freeze',
+          },
+        }];
+        return c;
+      });
+      render('easing-svg', defs);
+    }
+
+    function replayAll() {
+      fadeInDemo();
+      fadeOutDemo();
+      pulseDemo();
+      spinDemo();
+      bounceDemo();
+      shakeDemo();
+      slideDemo();
+      growDemo();
+      easingDemo();
+    }
+
+    replayAll();
+    document.getElementById('replay-btn').addEventListener('click', replayAll);
+  </script>
+</body>
+</html>
